@@ -164,3 +164,6 @@ with the method **model_dump()**
 
 In the same way, any serialized version of a class can be transformed into an object 
 with the **model_validate(json_data)** method.
+
+If you need to get the json representation of an object, use the **model_dump_json()** method.
+This could be useful if you want to create a payload in Flow, for example.

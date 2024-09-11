@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 import pytest
 from pydantic import HttpUrl
 
@@ -8,55 +8,55 @@ from nexthink_api import NxtNqlApiStatusResponse, NxtNqlStatus
 class TestNxtNqlApiStatusResponse:
 
     #  valid status SUBMITTED is correctly assigned
-    def test_valid_status_submitted(self):
+    def test_valid_status_submitted(self) -> None:
         response = NxtNqlApiStatusResponse(status=NxtNqlStatus.SUBMITTED)
         assert response.status == NxtNqlStatus.SUBMITTED, "Status is not correctly affected"
 
     #  invalid status string raises validation error
-    def test_invalid_status_string(self):
+    def test_invalid_status_string(self) -> None:
         with pytest.raises(ValueError):
             # noinspection PyTypeChecker
             NxtNqlApiStatusResponse(status="INVALID_STATUS")
 
     # Test good URL for resultFileUrl
-    def test_correct_url_format(self):
+    def test_correct_url_format(self) -> None:
         url_value = "https://www.test.com/token/123456"
         response = NxtNqlApiStatusResponse(status=NxtNqlStatus.COMPLETED, resultsFileUrl=url_value)
         assert response.status == NxtNqlStatus.COMPLETED, "status is not correctly affected"
         assert str(response.resultsFileUrl) == url_value, "resultsFileUrl is not correctly affected"
 
     #  invalid URL format for resultsFileUrl raises validation error
-    def test_invalid_url_format(self):
+    def test_invalid_url_format(self) -> None:
         with pytest.raises(ValueError):
             NxtNqlApiStatusResponse(status=NxtNqlStatus.COMPLETED, resultsFileUrl="invalid_url")
 
     #  both resultsFileUrl and errorDescription are None
-    def test_both_resultsfileurl_and_errordescription_none(self):
+    def test_both_resultsfileurl_and_errordescription_none(self) -> None:
         response = NxtNqlApiStatusResponse(status=NxtNqlStatus.SUBMITTED)
         assert response.resultsFileUrl is None, "default value should be None"
         assert response.errorDescription is None, "default value should be None"
 
     #  status is None raises validation error
-    def test_status_none_raises_validation_error(self):
+    def test_status_none_raises_validation_error(self) -> None:
         with pytest.raises(ValueError):
             # noinspection PyTypeChecker
             NxtNqlApiStatusResponse(status=None)
 
     # valie errorDescription affectation
-    def test_error_description_affectation(self):
+    def test_error_description_affectation(self) -> None:
         value = "test1"
         response = NxtNqlApiStatusResponse(status=NxtNqlStatus.COMPLETED, errorDescription=value)
         assert response.status == NxtNqlStatus.COMPLETED, "status is not correctly affected"
         assert response.errorDescription == value, "value is not correctly affected"
 
     # invalid type for errorDescription
-    def test_invalid_type_error_description(self):
+    def test_invalid_type_error_description(self) -> None:
         with pytest.raises(ValueError):
             # noinspection PyTypeChecker
             NxtNqlApiStatusResponse(status=NxtNqlStatus.COMPLETED, errorDescription=1)
 
     # object from json dict
-    def test_serialize_from_json(self, data_loader):
+    def test_serialize_from_json(self, data_loader) -> None:
         json_data = data_loader("nql_status_response_serialize.json")
         response = NxtNqlApiStatusResponse.model_validate(json_data)
         assert response.status == NxtNqlStatus(json_data['status']), "status is not correctly affected"
@@ -67,7 +67,7 @@ class TestNxtNqlApiStatusResponse:
             "error description is not correctly affected"
 
     # object serialisation to json
-    def test_serialize_to_json(self, data_loader):
+    def test_serialize_to_json(self, data_loader) -> None:
         json_data = data_loader("nql_status_response_serialize.json")
         response = NxtNqlApiStatusResponse.model_validate(json_data)
         to_json = response.model_dump(mode='json')

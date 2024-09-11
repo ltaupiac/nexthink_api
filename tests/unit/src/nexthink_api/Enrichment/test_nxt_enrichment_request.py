@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 from typing import Iterator
 from pydantic import ValidationError
 import pytest
@@ -28,7 +28,7 @@ class TestNxtEnrichmentRequest:
         return self.value_generator()
 
     #  Validate that the class accepts a list of 1 to 5000 NxtEnrichment objects
-    def test_accepts_valid_enrichment_range(self, value_iter):
+    def test_accepts_valid_enrichment_range(self, value_iter) -> None:
         # working values
         ident = [NxtIdentification(name=NxtIdentificationName.BINARY_BINARY_UID, value=next(value_iter))]
         f = [NxtField(name=NxtFieldName.ENVIRONMENT_NAME, value=next(value_iter))]
@@ -47,7 +47,7 @@ class TestNxtEnrichmentRequest:
         assert len(request.enrichments) == 5000
 
     # test for 0 and 5001
-    def test_bounds_enrichment_range(self, value_iter):
+    def test_bounds_enrichment_range(self, value_iter) -> None:
         # working values
         ident = [NxtIdentification(name=NxtIdentificationName.BINARY_BINARY_UID, value=next(value_iter))]
         f = [NxtField(name=NxtFieldName.ENVIRONMENT_NAME, value=next(value_iter))]
@@ -62,7 +62,7 @@ class TestNxtEnrichmentRequest:
             NxtEnrichmentRequest(enrichments=enrichments, domain="test.com")
 
     #  Ensure that the domain field accepts a non-empty string
-    def test_domain_accepts_non_empty_string(self, value_iter):
+    def test_domain_accepts_non_empty_string(self, value_iter) -> None:
         # working values
         ident = [NxtIdentification(name=NxtIdentificationName.BINARY_BINARY_UID, value=next(value_iter))]
         f = [NxtField(name=NxtFieldName.ENVIRONMENT_NAME, value=next(value_iter))]
@@ -72,7 +72,7 @@ class TestNxtEnrichmentRequest:
         assert request.domain == "test.com"
 
     #  Attempt to initialize with an empty string for the domain field
-    def test_empty_domain_field(self, value_iter):
+    def test_empty_domain_field(self, value_iter) -> None:
         # working values
         ident = [NxtIdentification(name=NxtIdentificationName.BINARY_BINARY_UID, value=next(value_iter))]
         f = [NxtField(name=NxtFieldName.ENVIRONMENT_NAME, value=next(value_iter))]

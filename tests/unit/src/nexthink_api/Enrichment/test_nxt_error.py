@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 from typing import Iterator
 import pytest
 
@@ -24,7 +24,7 @@ class TestNxtError:
         return self.value_generator()
 
     #  Create an instance with valid message and code
-    def test_create_instance_with_valid_data(self, value_iter):
+    def test_create_instance_with_valid_data(self, value_iter) -> None:
         message = next(value_iter)
         code = next(value_iter)
         error = NxtError(message=message, code=code)
@@ -32,19 +32,19 @@ class TestNxtError:
         assert error.code == code
 
     #  Attempt to create an instance with an empty message string
-    def test_empty_message_string(self, value_iter):
+    def test_empty_message_string(self, value_iter) -> None:
         code = next(value_iter)
         with pytest.raises(ValueError):
             NxtError(message="", code=code)
 
     #  Attempt to create an instance with an empty code string
-    def test_empty_code_string(self, value_iter):
+    def test_empty_code_string(self, value_iter) -> None:
         message = next(value_iter)
         with pytest.raises(ValueError):
             NxtError(message=message, code="")
 
     #  Attempt to create an instance with a code as int
-    def test_int_code(self, value_iter):
+    def test_int_code(self, value_iter) -> None:
         message = next(value_iter)
         with pytest.raises(ValueError):
             NxtError(message=message, code=5)

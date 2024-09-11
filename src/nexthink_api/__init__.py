@@ -5,6 +5,7 @@ from nexthink_api.Exceptions import NxtStatusTimeoutException
 from nexthink_api.Exceptions import NxtApiException
 from nexthink_api.Exceptions import NxtParamException
 from nexthink_api.Exceptions import NxtStatusException
+from nexthink_api.Exceptions import NxtExportException
 from nexthink_api.Exceptions import NxtTokenException
 
 from nexthink_api.Enrichment import NxtBadRequestResponse
@@ -48,6 +49,7 @@ __all__ = [
     "NxtApiException",
     "NxtParamException",
     "NxtStatusException",
+    "NxtExportException",
     "NxtTokenException",
 
     "NxtEnrichment",

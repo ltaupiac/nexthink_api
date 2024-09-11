@@ -84,7 +84,7 @@ class YamlParser:
 
         Returns
         -------
-            Path: 
+            Path:
                 Absolute path of root package
 
         """
@@ -109,7 +109,7 @@ class YamlParser:
 
         Returns
         -------
-            Path: 
+            Path:
                 Absolute path of class file
 
         """

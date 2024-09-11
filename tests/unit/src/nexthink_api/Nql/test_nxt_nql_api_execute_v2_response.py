@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 import pytest
 from pydantic import ValidationError
 
@@ -8,7 +8,7 @@ from nexthink_api import NxtNqlApiExecuteV2Response
 class TestNxtNqlApiExecuteV2Response:
 
     #  valid queryId, executedQuery, rows, executionDateTime, and data are correctly parsed
-    def test_valid_input_parsing(self):
+    def test_valid_input_parsing(self) -> None:
         response = NxtNqlApiExecuteV2Response(
             queryId="123",
             executedQuery="devices | list name",
@@ -23,7 +23,7 @@ class TestNxtNqlApiExecuteV2Response:
         assert response.data == [{"key1": "value1", "key2": "value2"}]
 
     #  executionDateTime is not in ISO format
-    def test_execution_iso_datetime_parsing(self):
+    def test_execution_iso_datetime_parsing(self) -> None:
         with pytest.raises(ValidationError):
             NxtNqlApiExecuteV2Response(
                 queryId="123",
@@ -34,7 +34,7 @@ class TestNxtNqlApiExecuteV2Response:
             )
 
     #  data dictionary contains expected key-value pairs
-    def test_data_dictionary_contents(self):
+    def test_data_dictionary_contents(self) -> None:
         response = NxtNqlApiExecuteV2Response(
             queryId="123",
             executedQuery="devices | list name",
@@ -45,7 +45,7 @@ class TestNxtNqlApiExecuteV2Response:
         assert response.data == [{"key1": "value1", "key2": "value2"}]
 
     # data is not a list
-    def test_data_is_not_list(self):
+    def test_data_is_not_list(self) -> None:
         with pytest.raises(ValidationError):
             # noinspection PyTypeChecker
             NxtNqlApiExecuteV2Response(
@@ -57,7 +57,7 @@ class TestNxtNqlApiExecuteV2Response:
             )
 
     #  rows is non-integer value
-    def test_invalid_rows_value(self):
+    def test_invalid_rows_value(self) -> None:
         with pytest.raises(ValueError):
             # noinspection PyTypeChecker
             NxtNqlApiExecuteV2Response(
@@ -69,7 +69,7 @@ class TestNxtNqlApiExecuteV2Response:
             )
 
     #  data contains non-string values
-    def test_invalid_data_dictionary(self):
+    def test_invalid_data_dictionary(self) -> None:
         with pytest.raises(ValueError):
             # noinspection PyTypeChecker
             NxtNqlApiExecuteV2Response(
@@ -81,7 +81,7 @@ class TestNxtNqlApiExecuteV2Response:
             )
 
     # object from json dict
-    def test_serialize_from_json(self, data_loader):
+    def test_serialize_from_json(self, data_loader) -> None:
         json_data = data_loader("nql_execute_v2_response_serialize.json")
         response = NxtNqlApiExecuteV2Response.model_validate(json_data)
         assert response.queryId == json_data['queryId'], "Bad queryId value"

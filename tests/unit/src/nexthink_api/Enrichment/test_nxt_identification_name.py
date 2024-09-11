@@ -1,7 +1,6 @@
-"""
-From the YAML file, keep only Identification enum values
+"""From the YAML file, keep only Identification enum values
 Remove the <> at the end of customIdentificationName
-Returns a list of Identification names to avoid duplicates
+Returns a list of Identification names to avoid duplicates.
 """
 import pytest
 
@@ -9,12 +8,12 @@ from nexthink_api import NxtIdentificationName
 
 
 class TestNxtIdentificationName:  # pylint: disable=too-few-public-methods
+    """Test the correspondence between the values obtained from an enum and a YAML file list.
+    get_identification_name_from_yaml: A fixture that returns a list of field names from a YAML file.
     """
-     Test the correspondence between the values obtained from an enum and a YAML file list.
-     get_identification_name_from_yaml: A fixture that returns a list of field names from a YAML file.
-     """
+
     @pytest.mark.yaml
-    def test_yaml_compliance_nxt_identification_name(self, read_yaml_file):
+    def test_yaml_compliance_nxt_identification_name(self, read_yaml_file) -> None:
         enrichment_data = read_yaml_file('enrichment.yaml')
         yaml_ids = list(enrichment_data['components']['schemas']['Identification']['properties']['name']['enum'])
         identification_from_yaml = {item.split('#', 1)[0] + '#{}'

@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 from typing import Iterator
 from pydantic import ValidationError
 import pytest
@@ -29,7 +29,7 @@ class TestNxtBadRequestResponse:
         return self.value_generator()
 
     # Instantiate with a single valid NxtIndividualObjectError
-    def test_single_valid_error(self, value_iter):
+    def test_single_valid_error(self, value_iter) -> None:
         v1 = next(value_iter)
         message1 = next(value_iter)
         code1 = next(value_iter)
@@ -41,7 +41,7 @@ class TestNxtBadRequestResponse:
         assert response.status == "error"
 
     #  Default status is set to 'error' when not explicitly provided
-    def test_default_status_error(self, value_iter):
+    def test_default_status_error(self, value_iter) -> None:
         v1 = next(value_iter)
         message1 = next(value_iter)
         code1 = next(value_iter)
@@ -53,7 +53,7 @@ class TestNxtBadRequestResponse:
         assert response.status == "error"
 
     #  status should be 'error' if provided
-    def test_bad_status_error(self, value_iter):
+    def test_bad_status_error(self, value_iter) -> None:
         v1 = next(value_iter)
         message1 = next(value_iter)
         code1 = next(value_iter)
@@ -66,7 +66,7 @@ class TestNxtBadRequestResponse:
             NxtBadRequestResponse(status=bad_status, errors=objError)
 
     #  Instantiate with multiple valid NxtIndividualObjectErrors
-    def test_multiple_valid_errors(self, value_iter):
+    def test_multiple_valid_errors(self, value_iter) -> None:
         v1 = next(value_iter)
         message1 = next(value_iter)
         code1 = next(value_iter)
@@ -78,11 +78,11 @@ class TestNxtBadRequestResponse:
         assert response.status == "error"
 
     #  Instantiate with an empty list of NxtIndividualObjectErrors
-    def test_empty_error_list(self):
+    def test_empty_error_list(self) -> None:
         with pytest.raises(ValidationError):
             NxtBadRequestResponse(errors=[])
 
     #  Instantiate with a list containing non-NxtIndividualObjectError items
-    def test_non_individual_object_error_items(self):
+    def test_non_individual_object_error_items(self) -> None:
         with pytest.raises(ValidationError):
             NxtBadRequestResponse(errors=["not_an_error_object"])

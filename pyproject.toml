@@ -15,9 +15,28 @@ dependencies=[
     "requests==2.31.0",
     "urllib3",
     "pydantic",
-    "pyyaml"
+    "pyyaml",
 ]
 readme = "README.md"
+
+[tool.uv]
+dev-dependencies = [
+  "pytest>=8.1.1,<9",
+  "ruff>=0.6.2",
+  "bump-my-version>=0.26.0",
+  "pip>=24.2",
+  "pipdeptree>=2.23.1",
+  "pip-autoremove>=0.10.0",
+  "twine>=5.1.1",
+  "pylint>=3.2.6",
+  "pytest-env>=1.1.4",
+  "pytest-mock>=3.14.0",
+  "mkdocs>=1.6.1",
+  "mkdocs-autorefs>=1.2.0",
+  "mkdocs-material>=9.5.34",
+  "mkdocstrings>=0.26.1",
+  "mkdocstrings-python>=1.11.1",
+]
 
 [tool.setuptools_scm]
 version_file = "src/nexthink_api/_version.py"
@@ -66,3 +85,9 @@ ignore = [
 
 [tool.ruff]
 line-length  = 120
+exclude = [
+    "tests",
+    "venv",
+    ".venv",
+]
+

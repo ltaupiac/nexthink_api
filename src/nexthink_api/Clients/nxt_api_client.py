@@ -4,9 +4,13 @@ import base64
 from typing import Union, Optional
 from urllib.parse import urljoin
 import time
+from io import StringIO
 from http import HTTPStatus
+import pandas as pd
 import requests
 
+
+from nexthink_api import NxtException
 from nexthink_api.Models.nxt_settings import NxtSettings
 from nexthink_api.Models.nxt_endpoint import NxtEndpoint
 from nexthink_api.Models.nxt_region_name import NxtRegionName
@@ -14,6 +18,7 @@ from nexthink_api.Models.nxt_token_request import NxtTokenRequest
 from nexthink_api.Models.nxt_token_response import NxtTokenResponse
 from nexthink_api.Exceptions.nxt_token_exception import NxtTokenException
 from nexthink_api.Exceptions.nxt_status_exception import NxtStatusException
+from nexthink_api.Exceptions.nxt_export_exception import NxtExportException
 from nexthink_api.Exceptions.nxt_timeout_exception import NxtStatusTimeoutException
 from nexthink_api.Enrichment.nxt_enrichment_request import NxtEnrichmentRequest
 from nexthink_api.Nql.nxt_nql_api_execute_request import NxtNqlApiExecuteRequest
@@ -326,6 +331,28 @@ class NxtApiClient:
             raise NxtStatusException("Try do download an export not completed")
         return requests.get(value.resultsFileUrl, proxies=self.settings.proxies, timeout=timeout)
 
+    def download_export_as_df(self, value: NxtNqlApiStatusResponse, timeout: int = 300) -> pd.DataFrame:
+        """Download an export file as a pandas DataFrame based on the NxtNqlApiStatusResponse value and a timeout period.
+
+        Parameters
+        ----------
+            value : NxtNqlApiStatusResponse
+                The status response object containing the export details.
+            timeout : int, optional
+                The timeout period for the download request in seconds. Defaults to 300.
+
+        Returns
+        -------
+            pd.DataFrame
+                The downloaded dataframe.
+
+        """
+        response = self.download_export(value, timeout)
+        if response.status_code == 200:
+            return pd.read_csv(StringIO(response.text))
+        else:
+            raise NxtExportException(f'Failed to download export:Status code {response.status_code}')
+
     # noinspection PyMethodMayBeStatic
     def check_method(self, endpoint: NxtEndpoint, method: str) -> bool:
         """Check if a given method is supported for a specific endpoint.
@@ -362,7 +389,7 @@ class NxtApiClient:
 
         Returns
         -------
-            ResponseAPIType 
+            ResponseAPIType
                 The response object containing the status of the request.
 
         Raises
@@ -391,7 +418,7 @@ class NxtApiClient:
 
         Returns
         -------
-             ResponseAPIType 
+             ResponseAPIType
                 The response object containing the status of the POST request.
 
         """

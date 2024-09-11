@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 from typing import Iterator
 import base64
 import requests
@@ -43,8 +43,7 @@ class TestNxtApiClientTest:
             json_data=None,
             endpoint=None,
             raise_for_status=None):
-        """This will return a mock response with the provided status, content and json data
-        """
+        """This will return a mock response with the provided status, content and json data."""
         mock_resp = mocker.Mock()
         # mock raise_for_status call w/optional error
         mock_resp.raise_for_status = mocker.Mock()
@@ -63,7 +62,7 @@ class TestNxtApiClientTest:
         return mock_resp
 
     # valid instance without token
-    def test_ValidInstanceWithoutToken(self, mocker, value_iter):
+    def test_ValidInstanceWithoutToken(self, mocker, value_iter) -> None:
         # Arrange
         instance = next(value_iter)
         region = NxtRegionName.eu
@@ -83,7 +82,7 @@ class TestNxtApiClientTest:
         assert isinstance(nxtClient.settings.region, NxtRegionName), "Instance of region should be NxtRegionName"
 
     # Valid instance with call to create_autorisation
-    def test_ValidInstance(self, mocker, value_iter):
+    def test_ValidInstance(self, mocker, value_iter) -> None:
         # Arrange
         instance = next(value_iter)
         region = NxtRegionName.eu
@@ -105,7 +104,7 @@ class TestNxtApiClientTest:
         assert nxtClient.settings.region == region, "Instance is not the one expected"
         assert isinstance(nxtClient.settings.region, NxtRegionName), "Instance of region should be NxtRegionName"
 
-    def test_get_bearer_token(self, mocker, value_iter):
+    def test_get_bearer_token(self, mocker, value_iter) -> None:
         # arrange
         instance = next(value_iter)
         region = NxtRegionName.eu
@@ -139,7 +138,7 @@ class TestNxtApiClientTest:
         }, "Headers are not set correctly"
 
     # Check if header is correct when the token has been got
-    def test_update_header(self, mocker, value_iter):
+    def test_update_header(self, mocker, value_iter) -> None:
         # Arrange
         instance = next(value_iter)
         region = NxtRegionName.eu
@@ -162,7 +161,7 @@ class TestNxtApiClientTest:
         }, "Headers are not set correctly"
 
     #  successfully retrieves data from a valid endpoint with default parameters
-    def test_get_valid_endpoint_default_params(self, mocker, value_iter):
+    def test_get_valid_endpoint_default_params(self, mocker, value_iter) -> None:
         # Arrange
         instance = next(value_iter)
         region = NxtRegionName.eu
@@ -194,7 +193,7 @@ class TestNxtApiClientTest:
         assert mock_get.call_once_with(NxtEndpoint.Enrichment), "get should have been call once"
 
     #  handles successful response with status code 200
-    def test_get_successful_response_200(self, mocker):
+    def test_get_successful_response_200(self, mocker) -> None:
         # Mock to bypass token
         mocker.patch.object(NxtApiClient, 'get_bearer_token', return_value=True)
 
@@ -213,7 +212,7 @@ class TestNxtApiClientTest:
         assert isinstance(response, NxtSuccessResponse)
 
     #  handles 207 Enrichment return code
-    def test_get_207_status_code(self, mocker, data_loader, patch_bearer_token):
+    def test_get_207_status_code(self, mocker, data_loader, patch_bearer_token) -> None:
         # Arrange
         data = data_loader('Enrichment207.json')
         mock_response = self._mock_response(mocker,
@@ -234,7 +233,7 @@ class TestNxtApiClientTest:
         assert response.model_dump() == data
 
     #  handles 400 Enrichment return code
-    def test_get_400_status_code(self, mocker, data_loader, patch_bearer_token):
+    def test_get_400_status_code(self, mocker, data_loader, patch_bearer_token) -> None:
         # Arrange
         data = data_loader('Enrichment400.json')
         mock_response = self._mock_response(mocker,
@@ -254,7 +253,7 @@ class TestNxtApiClientTest:
         assert isinstance(response, NxtBadRequestResponse)
         assert response.model_dump() == data
 
-    def test_get_401_status_code(self, mocker, patch_bearer_token):
+    def test_get_401_status_code(self, mocker, patch_bearer_token) -> None:
         # Arrange
         mock_response = self._mock_response(mocker,
                                             endpoint=NxtEndpoint.Enrichment,
@@ -271,7 +270,7 @@ class TestNxtApiClientTest:
         # Assert
         assert isinstance(response, NxtInvalidTokenRequest)
 
-    def test_get_403_status_code(self, mocker, patch_bearer_token):
+    def test_get_403_status_code(self, mocker, patch_bearer_token) -> None:
         # Arrange
         mock_response = self._mock_response(mocker,
                                             endpoint=NxtEndpoint.Enrichment,
@@ -290,7 +289,7 @@ class TestNxtApiClientTest:
         assert isinstance(response, NxtForbiddenResponse)
 
     #  handles network issues such as timeouts or connection errors
-    def test_get_network_issues(self, mocker):
+    def test_get_network_issues(self, mocker) -> None:
         # Mock
         mocker.patch("requests.get", side_effect=requests.exceptions.ConnectionError("Connection error"))
 
@@ -300,7 +299,7 @@ class TestNxtApiClientTest:
                          client_secret="test_secret")
 
     #  handles invalid endpoint values gracefully
-    def test_get_invalid_endpoint(self):
+    def test_get_invalid_endpoint(self) -> None:
         with pytest.raises(AttributeError):
             # noinspection PyUnresolvedReferences
             # pylint: disable=no-member

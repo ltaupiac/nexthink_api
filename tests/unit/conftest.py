@@ -1,4 +1,4 @@
-""" global fixture definition file for pytest """
+"""global fixture definition file for pytest."""
 
 import os
 from pathlib import Path
@@ -44,8 +44,7 @@ def data_loader(pytestconfig, request):
 
 @pytest.fixture
 def read_yaml_file(pytestconfig):
-    """
-    A fixture function that reads a YAML file that describe de Nexthink API.
+    """A fixture function that reads a YAML file that describe de Nexthink API.
     It loads the YAML file specified by the 'NEXTHINK_API_YAML' environment variable.
     Returns the parsed YAML content.
     """
@@ -61,10 +60,10 @@ def read_yaml_file(pytestconfig):
 
 # Bypass the token authentication
 @pytest.fixture
-def patch_bearer_token(mocker):
+def patch_bearer_token(mocker) -> None:
     mocker.patch.object(NxtApiClient, 'get_bearer_token', return_value=True)
 
 
 @pytest.fixture
-def patch_bearer_token_false(mocker):
+def patch_bearer_token_false(mocker) -> None:
     mocker.patch.object(NxtApiClient, 'get_bearer_token', return_value=False)

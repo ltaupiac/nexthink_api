@@ -1,16 +1,16 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 import pytest
 
 from nexthink_api import NxtFieldName
 
 
 class TestNxtFieldName:  # pylint: disable=too-few-public-methods
+    """Test the correspondence between the values obtained from an enum and a YAML file list.
+    :param get_nxt_field_name_list: A fixture that returns a list of field names from a YAML file.
     """
-     Test the correspondence between the values obtained from an enum and a YAML file list.
-     :param get_nxt_field_name_list: A fixture that returns a list of field names from a YAML file.
-     """
+
     @pytest.mark.yaml
-    def test_yaml_compliance_nxt_field_name(self, read_yaml_file):
+    def test_yaml_compliance_nxt_field_name(self, read_yaml_file) -> None:
         # Get Field name from yaml file
         enrichment_data = read_yaml_file('enrichment.yaml')
         yaml_fields = list(enrichment_data['components']['schemas']['Field']['properties']['name']['enum'])

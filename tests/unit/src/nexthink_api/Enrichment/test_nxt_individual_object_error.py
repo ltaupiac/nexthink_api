@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 from typing import Iterator
 from pydantic import ValidationError
 import pytest
@@ -28,7 +28,7 @@ class TestNxtIndividualObjectError:
         return self.value_generator()
 
     #  Validate successful creation with exactly one identification and multiple errors
-    def test_good_creation(self, value_iter):
+    def test_good_creation(self, value_iter) -> None:
         v1 = next(value_iter)
         message1 = next(value_iter)
         code1 = next(value_iter)
@@ -48,7 +48,7 @@ class TestNxtIndividualObjectError:
         assert obj.identification[0].value == v1  # pylint: disable=unsubscriptable-object
 
     #  Validate successful creation with exactly one identification and one error
-    def test_successful_creation_one_identification_one_error(self, value_iter):
+    def test_successful_creation_one_identification_one_error(self, value_iter) -> None:
         v1 = next(value_iter)
         message1 = next(value_iter)
         code1 = next(value_iter)
@@ -60,14 +60,14 @@ class TestNxtIndividualObjectError:
         assert len(obj.errors) == 1
 
     #  Attempt to create an instance with zero identifications
-    def test_zero_identifications(self, value_iter):
+    def test_zero_identifications(self, value_iter) -> None:
         message1 = next(value_iter)
         code1 = next(value_iter)
         with pytest.raises(ValidationError):
             NxtIndividualObjectError(identification=[], errors=[NxtError(message=message1, code=code1)])
 
     #  Attempt to create an instance with more than one identification
-    def test_more_than_one_identification(self, value_iter):
+    def test_more_than_one_identification(self, value_iter) -> None:
         v1 = next(value_iter)
         v2 = next(value_iter)
         message1 = next(value_iter)
@@ -80,7 +80,7 @@ class TestNxtIndividualObjectError:
             NxtIndividualObjectError(identification=identifications, errors=errors)
 
     #  Attempt to create an instance with zero errors
-    def test_zero_errors(self, value_iter):
+    def test_zero_errors(self, value_iter) -> None:
         v1 = next(value_iter)
         identification = [NxtIdentification(name=NxtIdentificationName.DEVICE_DEVICE_NAME, value=v1)]
 

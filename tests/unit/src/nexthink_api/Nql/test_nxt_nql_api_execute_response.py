@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 import pytest
 from pydantic import ValidationError
 
@@ -8,7 +8,7 @@ from nexthink_api import NxtDateTime, NxtNqlApiExecuteResponse
 class TestNxtNqlApiExecuteResponse:
 
     #  valid input data correctly initializes NxtNqlApiExecuteResponse instance
-    def test_valid_input_initializes_instance(self):
+    def test_valid_input_initializes_instance(self) -> None:
         execution_time = NxtDateTime(year=2023, month=10, day=5, hour=12, minute=30, second=45)
         response = NxtNqlApiExecuteResponse(
             queryId="queryId",
@@ -26,7 +26,7 @@ class TestNxtNqlApiExecuteResponse:
         assert response.data == [["Alice"], ["Bob"]]
 
     #  headers list containing non-string elements raises validation error
-    def test_headers_with_non_string_elements_raises_error(self):
+    def test_headers_with_non_string_elements_raises_error(self) -> None:
         execution_time = NxtDateTime(year=2023, month=10, day=5, hour=12, minute=30, second=45)
         with pytest.raises(ValueError):
             NxtNqlApiExecuteResponse(
@@ -39,7 +39,7 @@ class TestNxtNqlApiExecuteResponse:
             )
 
     #  data list containing non-list elements raises validation error
-    def test_data_with_non_list_elements_raises_error(self):
+    def test_data_with_non_list_elements_raises_error(self) -> None:
         execution_time = NxtDateTime(year=2023, month=10, day=5, hour=12, minute=30, second=45)
         with pytest.raises(ValueError):
             NxtNqlApiExecuteResponse(
@@ -52,7 +52,7 @@ class TestNxtNqlApiExecuteResponse:
             )
 
     #  rows field with negative or non-integer values raises validation error
-    def test_rows_with_invalid_values_raises_error(self):
+    def test_rows_with_invalid_values_raises_error(self) -> None:
         execution_time = NxtDateTime(year=2023, month=10, day=5, hour=12, minute=30, second=45)
         with pytest.raises(ValidationError):
             r = NxtNqlApiExecuteResponse(
@@ -75,7 +75,7 @@ class TestNxtNqlApiExecuteResponse:
             )
 
     # test build class from json dict
-    def test_serialize_from_json(self, data_loader):
+    def test_serialize_from_json(self, data_loader) -> None:
         json_data = data_loader("nql_execute_response_serialize.json")
         response = NxtNqlApiExecuteResponse.model_validate(json_data)
         assert response.queryId == json_data['queryId'], "Bad queryId value"

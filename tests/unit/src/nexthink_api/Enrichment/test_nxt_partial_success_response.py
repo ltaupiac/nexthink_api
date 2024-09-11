@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 from typing import Iterator
 from pydantic import ValidationError
 import pytest
@@ -29,7 +29,7 @@ class TestNxtPartialSuccessResponse:
         return self.value_generator()
 
     #  instantiate valide response
-    def test_valid_instantiation(self, value_iter):
+    def test_valid_instantiation(self, value_iter) -> None:
         value = next(value_iter)
         message = next(value_iter)
         code = next(value_iter)
@@ -41,6 +41,6 @@ class TestNxtPartialSuccessResponse:
         assert response.status == "partial_success"
 
     #  Attempt instantiation with an empty errors list and expect validation failure
-    def test_empty_errors_list_validation_failure(self):
+    def test_empty_errors_list_validation_failure(self) -> None:
         with pytest.raises(ValidationError):
             NxtPartialSuccessResponse(errors=[])

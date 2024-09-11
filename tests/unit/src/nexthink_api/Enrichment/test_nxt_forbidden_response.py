@@ -1,4 +1,4 @@
-"""Unit test file for nexthink_api"""
+"""Unit test file for nexthink_api."""
 from typing import Iterator
 from pydantic import ValidationError
 import pytest
@@ -25,13 +25,13 @@ class TestNxtForbiddenResponse:
         return self.value_generator()
 
     #  Instantiate NxtForbiddenResponse with a valid message string
-    def test_instantiate_with_valid_message(self, value_iter):
+    def test_instantiate_with_valid_message(self, value_iter) -> None:
         v1 = next(value_iter)
         response = NxtForbiddenResponse(message=v1)
         assert response.message == v1
 
     #  Access the message attribute after instantiation
-    def test_access_message_attribute(self, value_iter):
+    def test_access_message_attribute(self, value_iter) -> None:
         v1 = next(value_iter)
         v2 = next(value_iter)
         response = NxtForbiddenResponse(message=v1)
@@ -39,17 +39,17 @@ class TestNxtForbiddenResponse:
         assert response.message == v2
 
     #  Instantiate NxtForbiddenResponse with an empty string as message
-    def test_instantiate_with_empty_message(self):
+    def test_instantiate_with_empty_message(self) -> None:
         response = NxtForbiddenResponse(message="")
         assert response.message == ""
 
     #  Instantiate NxtForbiddenResponse with a very long string as message
-    def test_instantiate_with_long_message(self, value_iter):
+    def test_instantiate_with_long_message(self, value_iter) -> None:
         long_message = next(value_iter) * 10000  # very long string
         response = NxtForbiddenResponse(message=long_message)
         assert response.message == long_message
 
     #  Instantiate NxtForbiddenResponse with non-string types as message, expecting type errors
-    def test_instantiate_with_non_string_types(self):
+    def test_instantiate_with_non_string_types(self) -> None:
         with pytest.raises(ValidationError):
             NxtForbiddenResponse(message=123)
