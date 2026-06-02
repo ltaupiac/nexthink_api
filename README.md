@@ -1,169 +1,161 @@
-# Python Nexthink 
+# Python Nexthink
 
-This python library provides functionality to interact with 
-the **<a href="https://developer.nexthink.com/docs/api/api-credentials" target="_blank">Nexthink Infinity API</a>**.
+This Python library provides a small client for the
+[Nexthink API](https://docs.nexthink.com/api).
+
 ## Installation
-
-To install the Nexthink module with pip, use the following command:
 
 ```bash
 pip install nexthink_api
+# or
+uv add nexthink_api
 ```
 
-## Source and documentations
+## Source And Documentation
 
 - [Repository source](https://github.com/ltaupiac/nexthink_api)
-- [Online Documentation](https://ltaupiac.github.io/nexthink_api/)
+- [Online documentation](https://ltaupiac.github.io/nexthink_api/)
+- [Official Nexthink API documentation](https://docs.nexthink.com/api)
 
-## Usage
+## Quickstart
 
-### authentification:
+The recommended entrypoint for new code is `NexthinkClient`. The historical
+`NxtApiClient` remains available as a compatibility facade.
 
-```python
-from nexthink_api import NxtApiClient, NxtRegionName
+The examples below assume these environment variables are set:
 
-# Fill these in with your Nexthink environment details
-client_id = 'your_client_id'
-client_secret = 'your_client_secret'
-tenant = "tenant_string"
-# proxies = { https=os.getenv('https_proxy'), http=os.getenv('http_proxy')}
-
-# Create an instance of the client with the proxy parameters and credentials
-nxtClient = NxtApiClient(tenant, 
-                         NxtRegionName.eu, 
-                         client_id=client_id, 
-                         client_secret=client_secret,
-                         # proxies=proxies       # If you need a proxy
-                         )
+```bash
+export nexthink_tenant="your-tenant-name"
+export nexthink_region="eu"
+export client_id="your-client-id"
+export client_secret="your-client-secret"
 ```
-### Enrichment:
+
+When running behind a corporate proxy with TLS inspection, for example Zscaler,
+call `enable_truststore()` before creating the client. This enables the
+operating system trust store for Nexthink HTTP calls without permanently
+patching Python SSL for the whole process.
 
 ```python
-from datetime import datetime, timedelta
-from nexthink_api import (
-    NxtIdentification,
-    NxtIdentificationName,
-    NxtField,
-    NxtFieldName,
-    NxtEnrichment,
-    NxtEndpoint,
-    NxtEnrichmentRequest,
+import os
+
+from nexthink_api import NexthinkClient, NxtRegionName, enable_truststore
+
+enable_truststore()
+
+client = NexthinkClient(
+    os.environ["nexthink_tenant"],
+    NxtRegionName(os.getenv("nexthink_region", NxtRegionName.eu.value)),
+    client_id=os.environ["client_id"],
+    client_secret=os.environ["client_secret"],
+)
+```
+
+### NQL Execute
+
+The NQL query must already exist in Nexthink Administration as an API query.
+
+```python
+import os
+
+from nexthink_api import NxtNqlApiExecuteRequest
+
+request = NxtNqlApiExecuteRequest(
+    queryId=os.environ["nexthink_nql_query_id"],
 )
 
-# Will update Custom Fields for PC12345
-# The 3 Custom Fields have been created before in Nexthink admin
-# For demo, the 3 CF are named cf_demo1, cf_demo2, cf_demo3
-
-# Data to set in CF
-now = datetime.now()
-tomorrow = now + timedelta(days=1)
-yesterday = now - timedelta(days=1)
-
-# Identification of the device where CF will be updated
-identification = NxtIdentification(name=NxtIdentificationName.DEVICE_DEVICE_NAME, value="PC12345")
-
-# The 3 CF with  their value (value should be a string)
-field1 = NxtField(name=NxtFieldName.CUSTOM_DEVICE, value=str(now), custom_value="cf_demo1")
-field2 = NxtField(name=NxtFieldName.CUSTOM_DEVICE, value=str(tomorrow), custom_value="cf_demo2")
-field3 = NxtField(name=NxtFieldName.CUSTOM_DEVICE, value=str(yesterday), custom_value="cf_demo3")
-
-# Create the Enrichment record
-enrichments = [NxtEnrichment(identification=[identification], fields=[field1, field2, field3])]
-# Prepare the enrichment Request object
-enrichmentRequest = NxtEnrichmentRequest(enrichments=enrichments, domain="test_fdj")
-
-# This is the way to see the json payload of the enrichment request 
-payload = enrichmentRequest.model_dump()
-print(payload)
-
-# use the client to run perform the enrichment on the Enrichment endpoint
-response = nxtClient.run_enrichment(endpoint=NxtEndpoint.Enrichment, data=enrichmentRequest)
-print(response)
-```
-
-### NQL Requests:
-
-* NQL Queries are optimized for relatively small requests at a high frequency. 
-
-The NQL query must have been previously created in the Nexthink admin (admin/NQL API queries)
-For the example, the NQL query ID will be #get_pilot_collector_devices
-
-The NQL query is :
-```sql
-devices | where collector.update_group == 'Pilot'
-```
-
-```python
-from nexthink_api import (
-    NxtNqlApiExecuteRequest,
-    NxtEndpoint
-)
-
-# Query ID
-MyRequestID = "#get_pilot_collector_devices"
-# Create a nql request object 
-nqlRequest = NxtNqlApiExecuteRequest(queryId=MyRequestID)
-# Use the client to run the query on the Nql endpoint
-response = nxtClient.run_nql(NxtEndpoint.Nql, data=nqlRequest)
+response = client.nql.execute(request, version="v2")
 print(response.rows)
 print(response.data)
 ```
 
-### NQL Export:
+### Enrichment
 
-* NQL Export are optimized for large queries at low frequency
+This example updates one custom device field for one device identified by name.
 
-This request is asynchronous. You start the execution and get an exportID.
-You have to wait the end of export by querying the exportID status.
-Once the export is ready, you will get the S3 URL to download the export.
-
-The NQL query must have been previously created in the Nexthink admin (admin/NQL API queries)
-For the example, the NQL query ID will be **#get_windows_devices**.
-
-The NQL query is : 
-```sql
-devices | where operating_system.platform == windows
-```
 ```python
+import os
+from datetime import datetime
+
 from nexthink_api import (
-    NxtNqlApiExecuteRequest,
-    NxtEndpoint,
-    NxtNqlApiExportResponse,
-    NxtErrorResponse
+    MAX_ENRICHMENTS_PER_REQUEST,
+    NxtEnrichment,
+    NxtEnrichmentRequest,
+    NxtField,
+    NxtFieldName,
+    NxtIdentification,
+    NxtIdentificationName,
 )
 
-# Query ID
-MyRequestID = "#get_pilot_collector_devices"
-# Create a nql request object 
-nqlRequest = NxtNqlApiExecuteRequest(queryId=MyRequestID)
-# This time, use the client to run the query on the NqlExport endpoint
-response = nxtClient.run_nql(NxtEndpoint.NqlExport, data=nqlRequest)
-# If response is NqlNqlApiExportResponse, there is no error
-if isinstance(response, NxtNqlApiExportResponse):
-    # Response will contain the exportID
-    print(response)
-    # The client can wait for end of query
-    response = nxtClient.wait_status(response)
-    # This response will contain the S3 URL
-    print(response)
-    # You can use the nxtClient to download the export
-    # The export will be a csv data 
-    res = nxtClient.download_export(response)
-    # Print first 5 lines
-    first_lines = [ line for line in res.text.split('\n')[:5]]
-    for line in first_lines:
-        print(line)
-# Probably an NxtErrorResponse
-else:
-    print(response)
+identification = NxtIdentification(
+    name=NxtIdentificationName.DEVICE_DEVICE_NAME,
+    value=os.environ["nexthink_enrichment_device_name"],
+)
+field = NxtField(
+    name=NxtFieldName.CUSTOM_DEVICE,
+    custom_value="nexthink_api_example",
+    value=datetime.now().isoformat(),
+)
+enrichments = [NxtEnrichment(identification=[identification], fields=[field])]
+
+if len(enrichments) > MAX_ENRICHMENTS_PER_REQUEST:
+    raise ValueError("Too many enrichment objects for one request")
+
+request = NxtEnrichmentRequest(
+    domain=os.getenv("nexthink_enrichment_domain", "nexthink_api_example"),
+    enrichments=enrichments,
+)
+
+response = client.enrichment.run(request)
+print(response)
 ```
 
-### API Classes
-All Classes of the nexthink_api are build with Pydantic, so they can be serialize to dict 
-with the method **model_dump()**
+### Data Management Device Deletion
 
-In the same way, any serialized version of a class can be transformed into an object 
-with the **model_validate(json_data)** method.
+The Data Management deletion API is asynchronous and destructive. Keep an
+explicit confirmation in scripts and validate identifiers before calling it.
 
-If you need to get the json representation of an object, use the **model_dump_json()** method.
-This could be useful if you want to create a payload in Flow, for example.
+```python
+import os
+
+from nexthink_api import NxtDeviceEntry, NxtUidValidationMode
+
+if os.getenv("confirm_data_management_delete") != "yes":
+    raise SystemExit("Set confirm_data_management_delete=yes before deleting devices.")
+
+devices = [
+    NxtDeviceEntry(
+        uid=os.environ["nexthink_device_uid"],
+        name=os.environ["nexthink_device_name"],
+    )
+]
+
+response = client.data_management.delete_devices(
+    devices=devices,
+    request_id=os.environ["nexthink_request_id"],
+    uid_validation=NxtUidValidationMode.WARN,
+)
+print(response)
+```
+
+## Examples
+
+Runnable examples are available in `examples/`:
+
+```bash
+uv run python examples/nql_query_example.py
+uv run python examples/enrichment_example.py
+uv run python examples/data_management_device_deletion_example.py
+uv run python examples/remote_actions_example.py
+uv run python examples/campaigns_example.py
+uv run python examples/workflows_example.py
+uv run python examples/spark_handoff_example.py
+```
+
+## API Classes
+
+Most request and response classes are Pydantic models. Use:
+
+- `model_dump()` to serialize to a dictionary.
+- `model_dump_json()` to serialize to JSON.
+- `model_validate(data)` to build a model from serialized data.

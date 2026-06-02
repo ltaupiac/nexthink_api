@@ -8,6 +8,7 @@ from nexthink_api import (
     NxtApiClient,
     NxtRegionName,
     NxtEndpoint,
+    NxtLegacyApiWarning,
     NxtSuccessResponse,
     NxtPartialSuccessResponse,
     NxtBadRequestResponse,
@@ -15,6 +16,12 @@ from nexthink_api import (
     NxtInvalidTokenRequest
 
 )
+
+
+def _legacy_client(*args: object, **kwargs: object) -> NxtApiClient:
+    """Create the historical facade while asserting its deprecation warning."""
+    with pytest.warns(NxtLegacyApiWarning, match="`NxtApiClient` is deprecated"):
+        return NxtApiClient(*args, **kwargs)
 
 
 class TestNxtApiClientTest:
@@ -73,7 +80,7 @@ class TestNxtApiClientTest:
         mocker.patch.object(NxtApiClient, 'init_token', return_value=None)
 
         # Act
-        nxtClient = NxtApiClient(instance, region, client_id=client_id, client_secret=client_secret)
+        nxtClient = _legacy_client(instance, region, client_id=client_id, client_secret=client_secret)
 
         # Assert
         assert nxtClient.token is None, "Token should not initialize yet"
@@ -94,10 +101,14 @@ class TestNxtApiClientTest:
         get_bearer_token = mocker.patch.object(NxtApiClient, 'get_bearer_token', return_value=False)
 
         # Act
-        nxtClient = NxtApiClient(instance, region, client_id=client_id, client_secret=client_secret)
+        nxtClient = _legacy_client(instance, region, client_id=client_id, client_secret=client_secret)
 
         # Assert
-        assert nxtClient.headers['Authorization'] == f"Basic {expected_cred}", "Credential is not the one expected"
+        assert nxtClient.headers == {
+            "Authorization": f"Basic {expected_cred}",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "application/json",
+        }, "Credential headers are not the ones expected"
         assert get_bearer_token.call_once(), "get_bearer_token has not been call"
         assert nxtClient.token is None, "Token should not initialize yet"
         assert nxtClient.settings.instance == instance, "Instance is not the one expected"
@@ -116,17 +127,17 @@ class TestNxtApiClientTest:
                                                 "expires_in": 900,
                                                 "scope": "enrichment"
                                                 }
-        mock_post_response.url = NxtEndpoint.Token.value
+        mock_post_response.url = "https://tenant-login.eu.nexthink.cloud/oauth2/default/v1/token"
         mock_post_response.status_code = 200
         mock_post_response.text = 'test'
 
         # mock
         # get_bearer_token = mocker.patch.object(NxtApiClient, 'post', return_value=mock_response)
-        mock_post = mocker.patch('requests.post')
+        mock_post = mocker.patch('requests.sessions.Session.request')
         mock_post.return_value = mock_post_response
 
         # act
-        nxtClient = NxtApiClient(instance, region, client_id=client_id, client_secret=client_secret)
+        nxtClient = _legacy_client(instance, region, client_id=client_id, client_secret=client_secret)
 
         # assert
         assert nxtClient.token.access_token == "test_access_token", "Token is not the one expected"
@@ -149,7 +160,7 @@ class TestNxtApiClientTest:
         get_bearer_token = mocker.patch.object(NxtApiClient, 'get_bearer_token', return_value=True)
 
         # Act
-        nxtClient = NxtApiClient(instance, region, client_id=client_id, client_secret=client_secret)
+        nxtClient = _legacy_client(instance, region, client_id=client_id, client_secret=client_secret)
 
         # Assert
         assert nxtClient.token is None, "Token is not the one expected"
@@ -178,7 +189,7 @@ class TestNxtApiClientTest:
         mocker.patch.object(NxtApiClient, 'get_bearer_token', return_value=True)
 
         # Act
-        nxtClient = NxtApiClient(instance, region, client_id=client_id, client_secret=client_secret)
+        nxtClient = _legacy_client(instance, region, client_id=client_id, client_secret=client_secret)
 
         # Assert
         assert mock_client_instance.init_client.call_once(), "should have been call once"
@@ -201,10 +212,10 @@ class TestNxtApiClientTest:
         mock_response = self._mock_response(mocker, endpoint=NxtEndpoint.Enrichment)
 
         # Mock
-        mocker.patch("requests.get", return_value=mock_response)
+        mocker.patch("requests.sessions.Session.request", return_value=mock_response)
 
         # Act
-        client = NxtApiClient(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
+        client = _legacy_client(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
                               client_secret="test_secret")
         response = client.get(NxtEndpoint.Enrichment)
 
@@ -221,10 +232,10 @@ class TestNxtApiClientTest:
                                             json_data=data)
 
         # Mock
-        mocker.patch("requests.get", return_value=mock_response)
+        mocker.patch("requests.sessions.Session.request", return_value=mock_response)
 
         # Act
-        client = NxtApiClient(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
+        client = _legacy_client(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
                               client_secret="test_secret")
         response = client.get(NxtEndpoint.Enrichment)
 
@@ -242,10 +253,10 @@ class TestNxtApiClientTest:
                                             json_data=data)
 
         # Mock
-        mocker.patch("requests.get", return_value=mock_response)
+        mocker.patch("requests.sessions.Session.request", return_value=mock_response)
 
         # Act
-        client = NxtApiClient(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
+        client = _legacy_client(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
                               client_secret="test_secret")
         response = client.get(NxtEndpoint.Enrichment)
 
@@ -260,10 +271,10 @@ class TestNxtApiClientTest:
                                             status=401)
 
         # Mock
-        mocker.patch("requests.get", return_value=mock_response)
+        mocker.patch("requests.sessions.Session.request", return_value=mock_response)
 
         # Act
-        client = NxtApiClient(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
+        client = _legacy_client(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
                               client_secret="test_secret")
         response = client.get(NxtEndpoint.Enrichment)
 
@@ -278,10 +289,10 @@ class TestNxtApiClientTest:
         mock_response.reason = "Forbidden"
 
         # Mock
-        mocker.patch("requests.get", return_value=mock_response)
+        mocker.patch("requests.sessions.Session.request", return_value=mock_response)
 
         # Act
-        client = NxtApiClient(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
+        client = _legacy_client(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
                               client_secret="test_secret")
         response = client.get(NxtEndpoint.Enrichment)
 
@@ -291,11 +302,11 @@ class TestNxtApiClientTest:
     #  handles network issues such as timeouts or connection errors
     def test_get_network_issues(self, mocker) -> None:
         # Mock
-        mocker.patch("requests.get", side_effect=requests.exceptions.ConnectionError("Connection error"))
+        mocker.patch("requests.sessions.Session.request", side_effect=requests.exceptions.ConnectionError("Connection error"))
 
         # Act
         with pytest.raises(requests.exceptions.ConnectionError):
-            NxtApiClient(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
+            _legacy_client(instance="test_instance", region=NxtRegionName.us, client_id="test_id",
                          client_secret="test_secret")
 
     #  handles invalid endpoint values gracefully
@@ -303,5 +314,5 @@ class TestNxtApiClientTest:
         with pytest.raises(AttributeError):
             # noinspection PyUnresolvedReferences
             # pylint: disable=no-member
-            NxtApiClient(instance="test_instance", region=NxtRegionName.dom, client_id="test_id",
+            _legacy_client(instance="test_instance", region=NxtRegionName.dom, client_id="test_id",
                          client_secret="test_secret")

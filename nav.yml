@@ -1,13 +1,27 @@
 nav:
   - index.md
   - Examples: examples.md
+  - Migration 0.1.0: migration-0.1.0.md
   - Code Reference:
-      - Clients:
-        - Request: nxt_api_request.md
-        - Response: nxt_response.md
-      - Enrichment classes: Enrichment.md
-      - Nql classes: Nql.md
-      - Models:
+      - Public API Entry Points:
+          - Root Client: nxt_api_request.md
+          - Enrichment: Enrichment.md
+          - NQL: Nql.md
+          - Data Management: DataManagement.md
+          - Remote Actions: RemoteActions.md
+          - Campaigns: Campaigns.md
+          - Workflows: Workflows.md
+          - Spark: Spark.md
+      - API Object Models:
+          - Enrichment: object-models/Enrichment.md
+          - NQL: object-models/Nql.md
+          - Data Management: object-models/DataManagement.md
+          - Remote Actions: object-models/RemoteActions.md
+          - Campaigns: object-models/Campaigns.md
+          - Workflows: object-models/Workflows.md
+          - Spark: object-models/Spark.md
+      - Runtime Support Models:
+          - Response Builder: nxt_response.md
           - Endpoints: nxt_endpoint.md
           - Region Name: nxt_region_name.md
           - Settings: nxt_settings.md

@@ -3,65 +3,85 @@
 
 import os
 import sys
-from pprint import pprint
+from importlib.metadata import PackageNotFoundError, version
 
+from rich_output import console, ko, ok, panel, step, text_panel
 from nexthink_api import (
-    NxtApiClient,
+    NexthinkClient,
     NxtRegionName,
-    NxtEndpoint,
     NxtNqlApiExecuteRequest,
     NxtNqlApiExecuteResponse,
     NxtNqlApiExecuteV2Response,
     NxtNqlApiExportResponse,
+    enable_truststore,
 )
+
+# Enable OS trust store support for Nexthink HTTP calls behind corporate TLS
+# inspection proxies. This does not monkey patch Python SSL globally.
+enable_truststore()
 
 
 client_id = os.getenv('client_id')
 client_secret = os.getenv('client_secret')
+tenant = os.getenv("nexthink_tenant") or os.getenv("nxt_instance") or "your-tenant-name"
+region = os.getenv("nexthink_region", NxtRegionName.eu.value)
+default_nql_query_id = "#your_nql_query_id"
+nql_query_id = (
+    os.getenv("nexthink_nql_query_id")
+    or os.getenv("NEXTHINK_API_INTEGRATION_NQL_QUERY_ID")
+    or default_nql_query_id
+)
 
-https = os.getenv('https_proxy')
-http = os.getenv('http_proxy')
+https_proxy = os.getenv("https_proxy") or os.getenv("HTTPS_PROXY")
+http_proxy = os.getenv("http_proxy") or os.getenv("HTTP_PROXY")
 
 if client_id is None or client_secret is None:
-    print("client_id or client_secret not found")
-    sys.exit(1)
-if https is None or http is None:
-    print("https or http not found")
+    ko("client_id or client_secret not found")
     sys.exit(1)
 
-nxtClient = NxtApiClient('lfdj', NxtRegionName.eu, client_id=client_id, client_secret=client_secret,)
+step("[1/4] Checking local package version")
+try:
+    ok(f"nexthink_api version: {version('nexthink_api')}")
+except PackageNotFoundError:
+    ko("nexthink_api version: package metadata not found")
+if https_proxy or http_proxy:
+    ok("Proxy environment detected.")
+
+if not nql_query_id or nql_query_id == default_nql_query_id:
+    console.print()
+    console.print("Set nexthink_nql_query_id to a real NQL query ID before executing.")
+    sys.exit(0)
+
+step("[2/4] Creating Nexthink client and retrieving token")
+nxtClient = NexthinkClient(tenant, NxtRegionName(region), client_id=client_id, client_secret=client_secret)
 if nxtClient.token is None:
-    print("Can't get token")
+    ko("Token retrieval failed.")
     sys.exit(1)
+ok("Token retrieved successfully.")
 
-#
-# Prerequisite: In Nexthink, create an API request "check_licences"
-# devices | summarize NbDevices = count() by collector.tag_string
-#
-NX_GET_ALL_MAC = "#check_licences"
-nqlRequest = NxtNqlApiExecuteRequest(queryId=NX_GET_ALL_MAC)
+step("[3/4] Executing NQL query")
+console.print("Query id:", f"[bold]{nql_query_id}[/bold]")
+nqlRequest = NxtNqlApiExecuteRequest(queryId=nql_query_id)
+response = nxtClient.nql.execute(nqlRequest, version="v2")
 
-Endpoint = NxtEndpoint.Nql
-EndpointV2 = NxtEndpoint.NqlV2
-EndpointExport = NxtEndpoint.NqlExport
-
-# Use one of previous endpoints
-response = nxtClient.run_nql(Endpoint, data=nqlRequest)
-
+step("[4/4] Displaying response")
 if isinstance(response, NxtNqlApiExecuteResponse) or isinstance(response, NxtNqlApiExecuteV2Response):
-    print("number of rows: ", end="")
-    pprint(response.rows)
-    print("data:")
-    pprint(response.data)
-    print("execution date time: ", end="")
-    pprint(response.executionDateTime)
+    ok("NQL query executed successfully.")
+
+    summary = {
+        "rows": response.rows,
+        "executionDateTime": response.executionDateTime,
+    }
+
+    panel(summary, title="NQL summary")
+    panel(response.data, title="Data")
 elif isinstance(response, NxtNqlApiExportResponse):
-    print("Display 10 first lines of export")
-    response = nxtClient.wait_status(response)
-    pprint(response)
-    res = nxtClient.download_export(response)
+    ok("NQL export created successfully.")
+    response = nxtClient.nql.wait(response)
+    panel(response, title="Export status")
+    res = nxtClient.nql.download(response)
     first_lines = [line for line in res.text.split('\n')[:10]]
-    for line in first_lines:
-        print(line)
+    text_panel("\n".join(first_lines), title="First 10 export lines", border_style="cyan")
 else:
-    pprint(response)
+    ko("NQL query returned an unexpected response.")
+    panel(response, title="Response", border_style="red")

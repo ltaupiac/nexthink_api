@@ -4,7 +4,8 @@ from pydantic import ValidationError
 import pytest
 
 
-from nexthink_api import (NxtEnrichmentRequest,
+from nexthink_api import (MAX_ENRICHMENTS_PER_REQUEST,
+                          NxtEnrichmentRequest,
                           NxtIdentification,
                           NxtIdentificationName,
                           NxtField,
@@ -27,13 +28,13 @@ class TestNxtEnrichmentRequest:
     def value_iter(self) -> Iterator[str]:
         return self.value_generator()
 
-    #  Validate that the class accepts a list of 1 to 5000 NxtEnrichment objects
+    #  Validate that the class accepts the Nexthink Enrichment request range.
     def test_accepts_valid_enrichment_range(self, value_iter) -> None:
         # working values
         ident = [NxtIdentification(name=NxtIdentificationName.BINARY_BINARY_UID, value=next(value_iter))]
         f = [NxtField(name=NxtFieldName.ENVIRONMENT_NAME, value=next(value_iter))]
 
-        # test for 1 to 5000
+        # test for 1 to the documented maximum.
         enrichments = [NxtEnrichment(identification=ident, fields=f)]
         request = NxtEnrichmentRequest(enrichments=enrichments, domain="test.com")
         assert len(request.enrichments) == 1
@@ -42,11 +43,11 @@ class TestNxtEnrichmentRequest:
         request = NxtEnrichmentRequest(enrichments=enrichments, domain="test.com")
         assert len(request.enrichments) == 1000
 
-        enrichments = enrichments * 5
+        enrichments = enrichments * (MAX_ENRICHMENTS_PER_REQUEST // len(enrichments))
         request = NxtEnrichmentRequest(enrichments=enrichments, domain="test.com")
-        assert len(request.enrichments) == 5000
+        assert len(request.enrichments) == MAX_ENRICHMENTS_PER_REQUEST
 
-    # test for 0 and 5001
+    # test for 0 and one item above the documented maximum.
     def test_bounds_enrichment_range(self, value_iter) -> None:
         # working values
         ident = [NxtIdentification(name=NxtIdentificationName.BINARY_BINARY_UID, value=next(value_iter))]
@@ -57,7 +58,7 @@ class TestNxtEnrichmentRequest:
         with pytest.raises(ValidationError):
             NxtEnrichmentRequest(enrichments=[], domain="test.com")
 
-        enrichments = enrichments * 5001
+        enrichments = enrichments * (MAX_ENRICHMENTS_PER_REQUEST + 1)
         with pytest.raises(ValidationError):
             NxtEnrichmentRequest(enrichments=enrichments, domain="test.com")
 

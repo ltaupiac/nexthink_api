@@ -81,6 +81,6 @@ class NxtIdentification(BaseModel):
                  if value is empty.
 
         """
-        if not v or v.strip() == '':
+        if not v or not v.strip():
             raise ValueError('value must be a non-empty string')
         return v

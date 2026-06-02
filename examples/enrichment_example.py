@@ -3,52 +3,76 @@
 
 import os
 import sys
-from pprint import pprint
+from importlib.metadata import PackageNotFoundError, version
 from datetime import datetime
 
+from rich_output import console, ko, ok, panel, step
 from nexthink_api import (
-    NxtApiClient,
+    NexthinkClient,
     NxtRegionName,
     NxtIdentification,
     NxtIdentificationName,
     NxtField,
     NxtFieldName,
     NxtEnrichment,
-    NxtEndpoint,
     NxtEnrichmentRequest,
+    enable_truststore,
 )
+
+# Enable OS trust store support for Nexthink HTTP calls behind corporate TLS
+# inspection proxies. This does not monkey patch Python SSL globally.
+enable_truststore()
 
 
 client_id = os.getenv('client_id')
 client_secret = os.getenv('client_secret')
+tenant = os.getenv("nexthink_tenant") or os.getenv("nxt_instance") or "your-tenant-name"
+region = os.getenv("nexthink_region", NxtRegionName.eu.value)
+default_device_name = "DEVICE-NAME"
+device_name = os.getenv("nexthink_enrichment_device_name", default_device_name)
+domain = os.getenv("nexthink_enrichment_domain", "nexthink_api_example")
 
-https = os.getenv('https_proxy')
-http = os.getenv('http_proxy')
+https_proxy = os.getenv("https_proxy") or os.getenv("HTTPS_PROXY")
+http_proxy = os.getenv("http_proxy") or os.getenv("HTTP_PROXY")
 
 if client_id is None or client_secret is None:
-    print("client_id or client_secret not found")
-    sys.exit(1)
-if https is None or http is None:
-    print("https or http not found")
+    ko("client_id or client_secret not found")
     sys.exit(1)
 
-nxtClient = NxtApiClient('lfdj', NxtRegionName.eu, client_id=client_id, client_secret=client_secret,)
+step("[1/4] Checking local package version")
+try:
+    ok(f"nexthink_api version: {version('nexthink_api')}")
+except PackageNotFoundError:
+    ko("nexthink_api version: package metadata not found")
+if https_proxy or http_proxy:
+    ok("Proxy environment detected.")
+
+if not device_name or device_name == default_device_name:
+    console.print()
+    console.print("Set nexthink_enrichment_device_name to a real device name before running enrichment.")
+    sys.exit(0)
+
+step("[2/4] Creating Nexthink client and retrieving token")
+nxtClient = NexthinkClient(tenant, NxtRegionName(region), client_id=client_id, client_secret=client_secret)
 if nxtClient.token is None:
-    print("Can't get token")
+    ko("Token retrieval failed.")
     sys.exit(1)
+ok("Token retrieved successfully.")
 
 
+step("[3/4] Preparing enrichment request")
 # Creating the Enrichment record
-identification = NxtIdentification(name=NxtIdentificationName.DEVICE_DEVICE_NAME, value="M71879")
+identification = NxtIdentification(name=NxtIdentificationName.DEVICE_DEVICE_NAME, value=device_name)
 field1 = NxtField(name=NxtFieldName.CUSTOM_DEVICE, value=str(datetime.now()), custom_value="clw1")
 field2 = NxtField(name=NxtFieldName.CUSTOM_DEVICE, value=str(datetime.now()), custom_value="clw2")
 field3 = NxtField(name=NxtFieldName.CUSTOM_DEVICE, value=str(datetime.now()), custom_value="clw3")
 
 enrichments = [NxtEnrichment(identification=[identification], fields=[field1, field2, field3])]
-enrichmentRequest = NxtEnrichmentRequest(enrichments=enrichments, domain="test_fdj")
+enrichmentRequest = NxtEnrichmentRequest(enrichments=enrichments, domain=domain)
 payload = enrichmentRequest.model_dump()
-pprint(payload)
+panel(payload, title="Enrichment request")
 
-# use the client to run perform the enrichment on the Enrichment endpoint
-response = nxtClient.run_enrichment(endpoint=NxtEndpoint.Enrichment, data=enrichmentRequest)
-pprint(response)
+step("[4/4] Running enrichment")
+# use the client to perform the enrichment on the Enrichment endpoint
+response = nxtClient.enrichment.run(enrichmentRequest)
+panel(response, title="Enrichment response")

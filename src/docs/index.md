@@ -1,42 +1,56 @@
-<div style="text-align: center;">
+# nexthink_api
 
-<h2><b>nexthink_api</b><br>
-Simplified Access and Integration with Nexthink APIs</h2>
+Python client for the [Nexthink API](https://docs.nexthink.com/api).
 
-</div>
+## Documentation Sources
 
+The official Nexthink API documentation is the upstream reference:
 
+- [Nexthink API documentation](https://docs.nexthink.com/api)
+- [Nexthink API sitemap](https://docs.nexthink.com/api/sitemap.md)
+- [Nexthink API LLM snapshot](https://docs.nexthink.com/api/llms-full.txt)
 
-!!! Info ""
-    This Python package provides easy access to Nexthink APIs,
-    simplifying the integration and use of Nexthink’s features in your applications.
+Runtime behavior does not depend on downloading YAML files from the Nexthink
+documentation site. The package contract is defined by the Python models,
+domain clients, tests, and the local `SpecRegistry`.
 
----
+## Public Client
 
-### :link: Informations
+Use `NexthinkClient` for new code:
 
-This package relies on the Nexthink documentation
+```python
+from nexthink_api import NexthinkClient, NxtRegionName
 
-- [Nexthink API documentation](https://developer.nexthink.com/docs/api)
+client = NexthinkClient(
+    "tenant-name",
+    NxtRegionName.eu,
+    client_id="client-id",
+    client_secret="client-secret",
+)
+```
 
+The historical `NxtApiClient` remains available as a compatibility facade.
 
-Class specifications are based on the YAML documentation of each API.
+## Supported Domains
 
-- [Yaml Enrichment specifications](https://stoplight.io/api/v1/projects/nexthink/api/nodes/api/enrichment.yaml)
-- [Yaml Nql specifications](https://stoplight.io/api/v1/projects/nexthink/api/nodes/api/nql.yaml)
-- [Yaml Act specifications](https://stoplight.io/api/v1/projects/nexthink/api/nodes/api/act.yaml)
-- [Yaml Engage specifications](https://stoplight.io/api/v1/projects/nexthink/api/nodes/api/engage.yaml)
-- [Yaml Workflow specifications](https://stoplight.io/api/v1/projects/nexthink/api/nodes/api/workflow.yaml)
+- Enrichment
+- NQL
+- Data Management
+- Remote Actions
+- Campaigns
+- Workflows
+- Spark
 
----
+## Corporate Proxy TLS Inspection
 
-!!! Warning 
-    The development of this package is still in its early stages.<br>
-    Currently, only the **Enrichment** and **Nql** parts are available.<br>
-    Please be aware that there may still be bugs.
+When running behind a corporate proxy with TLS inspection, for example Zscaler,
+call `enable_truststore()` before creating the client:
 
-#### parts to come
-- Act
-- Engage
-- Workflow
-- Audit Trails
+```python
+from nexthink_api import enable_truststore
+
+enable_truststore()
+```
+
+This enables the operating system trust store for Nexthink HTTP calls without
+permanently patching Python SSL for the whole process.

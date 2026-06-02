@@ -1,0 +1,101 @@
+{
+  "base_url": "https://docs.nexthink.com/api",
+  "documents": [
+    {
+      "bytes": 2843,
+      "filename": "sitemap.md",
+      "url": "https://docs.nexthink.com/api/sitemap.md"
+    },
+    {
+      "bytes": 140364,
+      "filename": "llms-full.txt",
+      "url": "https://docs.nexthink.com/api/llms-full.txt"
+    },
+    {
+      "bytes": 3674,
+      "filename": "readme.md",
+      "url": "https://docs.nexthink.com/api/readme.md"
+    },
+    {
+      "bytes": 4290,
+      "filename": "authentication-token.md",
+      "url": "https://docs.nexthink.com/api/getting-authentication-token.md"
+    },
+    {
+      "bytes": 1821,
+      "filename": "campaigns.md",
+      "url": "https://docs.nexthink.com/api/campaigns.md"
+    },
+    {
+      "bytes": 4106,
+      "filename": "campaigns-models.md",
+      "url": "https://docs.nexthink.com/api/campaigns/models.md"
+    },
+    {
+      "bytes": 4897,
+      "filename": "data-management.md",
+      "url": "https://docs.nexthink.com/api/data-management.md"
+    },
+    {
+      "bytes": 5046,
+      "filename": "data-management-models.md",
+      "url": "https://docs.nexthink.com/api/data-management/models.md"
+    },
+    {
+      "bytes": 6000,
+      "filename": "enrichment.md",
+      "url": "https://docs.nexthink.com/api/enrichment.md"
+    },
+    {
+      "bytes": 14993,
+      "filename": "enrichment-models.md",
+      "url": "https://docs.nexthink.com/api/enrichment/models.md"
+    },
+    {
+      "bytes": 9892,
+      "filename": "nql.md",
+      "url": "https://docs.nexthink.com/api/nql.md"
+    },
+    {
+      "bytes": 5984,
+      "filename": "nql-models.md",
+      "url": "https://docs.nexthink.com/api/nql/models.md"
+    },
+    {
+      "bytes": 2513,
+      "filename": "remote-actions.md",
+      "url": "https://docs.nexthink.com/api/remote-actions.md"
+    },
+    {
+      "bytes": 9341,
+      "filename": "remote-actions-models.md",
+      "url": "https://docs.nexthink.com/api/remote-actions/models.md"
+    },
+    {
+      "bytes": 2247,
+      "filename": "workflows.md",
+      "url": "https://docs.nexthink.com/api/workflows.md"
+    },
+    {
+      "bytes": 8354,
+      "filename": "workflows-models.md",
+      "url": "https://docs.nexthink.com/api/workflows/models.md"
+    },
+    {
+      "bytes": 2014,
+      "filename": "spark.md",
+      "url": "https://docs.nexthink.com/api/spark.md"
+    },
+    {
+      "bytes": 3618,
+      "filename": "spark-handoff-api.md",
+      "url": "https://docs.nexthink.com/api/spark/handoff-api.md"
+    },
+    {
+      "bytes": 4783,
+      "filename": "spark-models.md",
+      "url": "https://docs.nexthink.com/api/spark/models.md"
+    }
+  ],
+  "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 Edg/125.0.0.0"
+}

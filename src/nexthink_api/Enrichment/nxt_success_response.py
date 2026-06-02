@@ -1,7 +1,7 @@
 """Nexthink API Object classes module. Based on Pydantic for data validation and serialization."""
 
 from typing import Literal
-from pydantic import BaseModel,  Field
+from pydantic import BaseModel, Field
 
 __all__ = ["NxtSuccessResponse"]
 

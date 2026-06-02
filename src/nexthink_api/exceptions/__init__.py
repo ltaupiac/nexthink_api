@@ -7,6 +7,7 @@ from nexthink_api.Exceptions.nxt_param_exception import NxtParamException
 from nexthink_api.Exceptions.nxt_status_exception import NxtStatusException
 from nexthink_api.Exceptions.nxt_export_exception import NxtExportException
 from nexthink_api.Exceptions.nxt_token_exception import NxtTokenException
+from nexthink_api.Exceptions.nxt_legacy_api_warning import NxtLegacyApiWarning
 
 __all__ = [
     "NxtException",
@@ -16,4 +17,5 @@ __all__ = [
     "NxtStatusException",
     "NxtTokenException",
     "NxtExportException",
+    "NxtLegacyApiWarning",
 ]

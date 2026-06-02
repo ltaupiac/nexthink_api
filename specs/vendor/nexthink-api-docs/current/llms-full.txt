@@ -1,0 +1,1169 @@
+# API credentials
+
+Accessing features using the Nexthink APIs gives you the flexibility to create integrations from external third-party tools. Using APIs helps remove complexity, as IT teams do not have to access multiple consoles to carry out their work. API credentials provide authentication based on the OAuth client credentials, which you can manage using the Nexthink web interface.
+
+## Accessing API credentials
+
+To set up an integration with a Nexthink API, you must first create a set of API credentials for your instance that the external application or service must use to access the API and send requests.
+
+Nexthink public API relies on OAuth 2.0. It comprises a Client Secret and Client ID, which the system uses to generate an access token to call an application or service.
+
+To set up new credentials for your application:
+
+1. Log in to the Nexthink web interface.
+2. Select **Administration** from the main menu.
+3. Click on **API credentials** in the navigation panel from the Account Management section.
+
+![Accessing the API credential configuration screen](/files/TIMHMcIJ8gQe63cEswa6)
+
+## Creating API credentials
+
+Click on the **New OAuth client credentials** button located in the top-right of the API credentials page.
+
+<figure><img src="/files/XjF39DBYKjn0vXsfXVpn" alt=""><figcaption></figcaption></figure>
+
+* **Name**: provide a meaningful name for the credential. Nexthink recommends using the name of the application you are configuring to call the API.
+* **Description**: enter a description to inform users what applications and services use the credentials and why.
+* **Permissions**: select the features you want to enable the permissions for. Some permissions are related to features that may not be available to you, for example, features in technical preview or those not included in your license.
+  * **Remote Actions API**: Select the checkbox to send API calls to trigger and query remote actions.
+  * **Enrichment API**: Select the checkbox to send API calls to operate the enrichment feature.
+  * **Data management**: Select the checkbox to send API calls to manage devices.
+  * **Workflows API**: Select the checkbox to send API calls to trigger and query workflows.
+  * **Campaigns API**: Select the checkbox to send API calls to trigger campaigns.
+  * **NQL API**: Select the checkbox to send API calls to extract data.
+  * **Spark API**: Select the checkbox to send API calls to transfer a live conversation to Spark.
+* Click on **Save and generate credentials** to generate the credentials. A new modal appears with the OAuth client credentials.
+
+![Client ID and secret key](/files/ZUr0JDEN2P1anBxhrLs1)
+
+For security reasons, the credentials appear only once. Copy and save them securely, as you cannot access them beyond this point.
+
+* Click on the **Copy** button for **Client ID** and **Secret key,** then paste the information into the secure vault authorized by your organization.
+
+
+# Getting an authentication token
+
+The Nexthink APIs rely on a specific HTTP authentication scheme called [bearer authentication](https://swagger.io/docs/specification/authentication/bearer-authentication/) or token authentication. Get a token from the API using the Client Secret and Client ID generated earlier in the setup process.
+
+Here are curl command examples:
+
+<details>
+
+<summary>zsh</summary>
+
+{% code title="" overflow="wrap" %}
+
+```zsh
+curl --location "https://instance-login.region.nexthink.cloud/oauth2/default/v1/token" --header "Content-Type: application/x-www-form-urlencoded" --header "Authorization: Basic <Base64 encoded clientId:clientSecret>" --data-urlencode "grant_type=client_credentials" --data-urlencode "scope=service:integration"
+```
+
+{% endcode %}
+
+</details>
+
+<details>
+
+<summary>powershell</summary>
+
+{% code overflow="wrap" %}
+
+```powershell
+$headers = @{
+  "Content-Type"  = "application/x-www-form-urlencoded"
+  "Authorization" = "Basic <Base64 encoded clientId:clientSecret>"
+}
+$body = @{
+  "grant_type" = "client_credentials"
+  "scope"      = "service:integration"
+}
+
+$response = Invoke-RestMethod -Uri 'https://instance-login.region.nexthink.cloud/oauth2/default/v1/token' `
+  -Method 'POST' `
+  -Headers $headers `
+  -Body $body `
+  -ContentType 'application/x-www-form-urlencoded'
+
+$response | ConvertTo-Json
+```
+
+{% endcode %}
+
+</details>
+
+<details>
+
+<summary>cmd</summary>
+
+{% code overflow="wrap" %}
+
+```cmd
+curl --location "https://instance-login.region.nexthink.cloud/oauth2/default/v1/token" --header "Content-Type: application/x-www-form-urlencoded" --header "Authorization: Basic <Base64 encoded clientId:clientSecret>" --data-urlencode "grant_type=client_credentials" --data-urlencode "scope=service:integration"
+```
+
+{% endcode %}
+
+</details>
+
+Replace `instance` by the name of the instance and `region` by the name of one of the following regions:
+
+* `us` for the United States
+* `eu` for the European Union
+* `pac` for Asia-Pacific
+* `meta` for the Middle East, Turkey and Africa
+
+Replace `<Base64 encoded clientId:clientSecret>` with the Base64 token you generate from your `clientId` and `clientSecret` separated by a colon `:` .
+
+#### Generating the Base64 token
+
+In the example below, the value
+
+* &#x20;`q2tj2fvyevr4z9djhkilhlmj3yw39tqpg` is the **clientId**, and&#x20;
+* `cwbxklimy4k7qtnxohpbnueaydsuuhoftqza8tfzkykf` is the **clientSecret**.
+
+The following examples show how to do this using the command-line interface (CLI)
+
+<details>
+
+<summary>zsh</summary>
+
+{% code overflow="wrap" %}
+
+```zsh
+echo -n q2tj2fvyevr4z9djhkilhlmj3yw39tqpg:cwbxklimy4k7qtnxohpbnueaydsuuhoftqza8tfzkykf | base64
+```
+
+{% endcode %}
+
+</details>
+
+<details>
+
+<summary>powershell</summary>
+
+{% code overflow="wrap" %}
+
+```powershell
+[System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes("q2tj2fvyevr4z9djhkilhlmj3yw39tqpg:cwbxklimy4k7qtnxohpbnueaydsuuhoftqza8tfzkykf"))
+```
+
+{% endcode %}
+
+</details>
+
+<details>
+
+<summary>cmd</summary>
+
+{% code overflow="wrap" %}
+
+```cmd
+powershell "[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes(\"q2tj2fvyevr4z9djhkilhlmj3yw39tqpg:cwbxklimy4k7qtnxohpbnueaydsuuhoftqza8tfzkykf\"))"
+```
+
+{% endcode %}
+
+</details>
+
+If the call is successful, the response is as follows, and the `access_token` field contains the token.
+
+```json
+{
+    "token_type": "Bearer",
+    "expires_in": 900,
+    "access_token": "example",
+    "scope": "service:integration"
+}
+```
+
+The token has a 15-minute lifespan, after which you must request a new token.
+
+
+# Campaigns
+
+Trigger campaigns using the Nexthink Campaigns API, giving you the flexibility to create integrations with external applications.
+
+## Setting up API credentials
+
+To set up an integration with the Nexthink API, you must first create a set of API credentials in your instance that the external application or service will use to access the API and send requests to Remote Actions. Refer to the [API Credentials](/api) documentation.
+
+## Configuring a campaign for API
+
+1. Create a new campaign or edit an existing one as described in the [Manage Campaigns](https://docs.nexthink.com/platform/latest/manage-campaigns) documentation.
+2. Under the **General** tab, check the **API** check box.
+
+![Enabling a campaign for the API](/files/qypSY899d9jv7aIgUs3H)
+
+## Copying a campaign ID
+
+To trigger a campaign via the API, you must know its NQL ID.
+
+1. Select **Campaigns** from the main menu.
+2. Click the **Manage campaigns** button at the bottom of the navigation panel.
+3. Find the campaign you need the ID for and edit it.
+4. Save the NQL ID for late use.
+
+
+# Trigger a campaign
+
+Send campaigns to users using the Nexthink public API.
+
+## Trigger a campaign
+
+> Trigger the sending of a campaign to specific users.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Campaigns API","version":"1.0.0"},"tags":[{"name":"Campaigns"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"BearerAuth":[]}],"components":{"securitySchemes":{"BearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"jwt"}},"schemas":{"TriggerRequest":{"required":["campaignNqlId","expiresInMinutes","userSid"],"type":"object","properties":{"campaignNqlId":{"minLength":1,"type":"string","description":"The ID of the campaign to send."},"userSid":{"maxItems":10000,"minItems":1,"type":"array","description":"SIDs of users that the campaign should be sent to.","items":{"type":"string","description":"SID of a user."}},"expiresInMinutes":{"maximum":525600,"minimum":1,"type":"integer","description":"The number of minutes before the campaign response expires and will stop being shown to the users, starting from the current time. The expiration date and time is set at the time of the API call and is not influenced by the time at which the campaign is displayed to the user or by the user postponing the campaign.","format":"int32"},"parameters":{"maxItems":30,"type":"object","additionalProperties":{"type":"string"},"description":"Key and value of the parameters within the campaign to be replaced to compose the final questions to be displayed. The provided keys must match exactly the IDs of all parameters of the campaign. In case a duplicated key is specified, only the latest value of the parameter will be taken into account."}}},"TriggerSuccessResponse":{"required":["requests"],"type":"object","properties":{"requests":{"minItems":1,"type":"array","description":"Identifiers of the requests created for each user SID sent in the request or corresponding message in case of error. Duplicate SIDs in the API request are filtered out from the response list.","items":{"$ref":"#/components/schemas/TriggerResponseDetails"}}}},"TriggerResponseDetails":{"required":["userSid"],"type":"object","properties":{"requestId":{"type":"string","description":"ID of the request created for the user that can be used to retrieve later the status and answers to the campaign, in case the request could be created successfully"},"userSid":{"type":"string","description":"SID of the user"},"message":{"type":"string","description":"Reason why a request could not be created for that user SID"}}},"TriggerErrorResponse":{"required":["code","message"],"type":"object","properties":{"code":{"type":"string","description":"The error code returned to the client."},"message":{"type":"string","description":"The error message returned to the client."}}}}},"paths":{"/api/v1/euf/campaign/trigger":{"post":{"tags":["Campaigns"],"summary":"Trigger a campaign","description":"Trigger the sending of a campaign to specific users.","operationId":"triggerCampaign","parameters":[],"requestBody":{"description":"The configuration of the campaign target.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TriggerRequest"}}},"required":true},"responses":{"200":{"description":"OK - Successful triggering.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TriggerSuccessResponse"}}}},"400":{"description":"Bad request - Invalid request, see the error code for details.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TriggerErrorResponse"}}}},"401":{"description":"Unauthorized - No valid authentication credentials.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/TriggerErrorResponse"}}}},"403":{"description":"Forbidden - Error response when no permissions."}}}}}}
+```
+
+
+# Models
+
+## The TriggerErrorResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Campaigns API","version":"1.0.0"},"components":{"schemas":{"TriggerErrorResponse":{"required":["code","message"],"type":"object","properties":{"code":{"type":"string","description":"The error code returned to the client."},"message":{"type":"string","description":"The error message returned to the client."}}}}}}
+```
+
+## The TriggerRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Campaigns API","version":"1.0.0"},"components":{"schemas":{"TriggerRequest":{"required":["campaignNqlId","expiresInMinutes","userSid"],"type":"object","properties":{"campaignNqlId":{"minLength":1,"type":"string","description":"The ID of the campaign to send."},"userSid":{"maxItems":10000,"minItems":1,"type":"array","description":"SIDs of users that the campaign should be sent to.","items":{"type":"string","description":"SID of a user."}},"expiresInMinutes":{"maximum":525600,"minimum":1,"type":"integer","description":"The number of minutes before the campaign response expires and will stop being shown to the users, starting from the current time. The expiration date and time is set at the time of the API call and is not influenced by the time at which the campaign is displayed to the user or by the user postponing the campaign.","format":"int32"},"parameters":{"maxItems":30,"type":"object","additionalProperties":{"type":"string"},"description":"Key and value of the parameters within the campaign to be replaced to compose the final questions to be displayed. The provided keys must match exactly the IDs of all parameters of the campaign. In case a duplicated key is specified, only the latest value of the parameter will be taken into account."}}}}}}
+```
+
+## The TriggerResponseDetails object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Campaigns API","version":"1.0.0"},"components":{"schemas":{"TriggerResponseDetails":{"required":["userSid"],"type":"object","properties":{"requestId":{"type":"string","description":"ID of the request created for the user that can be used to retrieve later the status and answers to the campaign, in case the request could be created successfully"},"userSid":{"type":"string","description":"SID of the user"},"message":{"type":"string","description":"Reason why a request could not be created for that user SID"}}}}}}
+```
+
+## The TriggerSuccessResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Campaigns API","version":"1.0.0"},"components":{"schemas":{"TriggerSuccessResponse":{"required":["requests"],"type":"object","properties":{"requests":{"minItems":1,"type":"array","description":"Identifiers of the requests created for each user SID sent in the request or corresponding message in case of error. Duplicate SIDs in the API request are filtered out from the response list.","items":{"$ref":"#/components/schemas/TriggerResponseDetails"}}}},"TriggerResponseDetails":{"required":["userSid"],"type":"object","properties":{"requestId":{"type":"string","description":"ID of the request created for the user that can be used to retrieve later the status and answers to the campaign, in case the request could be created successfully"},"userSid":{"type":"string","description":"SID of the user"},"message":{"type":"string","description":"Reason why a request could not be created for that user SID"}}}}}}
+```
+
+
+# Data management
+
+Remove devices from the Nexthink inventory in bulk using the Data management API. Submit a batch of devices identified by their UID and name. The API is asynchronous: it queues each valid device for deletion and returns a per-device scheduling status immediately.
+
+## Prerequisites
+
+Before using the Data management API, ensure the following are in place:
+
+1. **API credentials**: Create a set of API credentials in your Nexthink instance as described in the API Credentials documentation.
+2. **JWT permission scope**: The API credential must include the `nx_dataplatform_device_deletion_api` permission scope.
+
+## Identifying devices
+
+Each entry in the request requires two fields:
+
+<table><thead><tr><th width="136.6666259765625">Field</th><th>Description</th></tr></thead><tbody><tr><td><code>uid</code></td><td>Device UID assigned by the Nexthink Collector. Must be a valid UUID.</td></tr><tr><td><code>name</code></td><td>Device name as reported by the Nexthink Collector. Must not be blank.</td></tr></tbody></table>
+
+To retrieve device UIDs, run an [Investigation](https://docs.nexthink.com/platform/latest/investigations) scoped to the devices you want to remove and export the result to CSV.
+
+## Request limits
+
+A single request can contain a maximum of 100 devices. For larger deletions, split the list into batches of up to 100 and call the API once per batch.
+
+## Per-device status
+
+The API validates each device independently. A malformed UID does not cause the entire batch to be rejected, it produces an `INVALID` status for that entry while the rest of the batch proceeds.
+
+<table><thead><tr><th width="135.333251953125">Status</th><th>Meaning</th></tr></thead><tbody><tr><td><code>SCHEDULED</code></td><td>Device successfully queued for deletion.</td></tr><tr><td><code>INVALID</code></td><td>The device UID is malformed; this entry was skipped.</td></tr><tr><td><code>FAILED</code></td><td>A downstream error prevented this device from being scheduled.</td></tr></tbody></table>
+
+The `scheduledCount` field in the response indicates how many devices were queued successfully.
+
+## Asynchronous deletion
+
+A `202 Accepted` response confirms that the valid devices have been queued. Actual removal from the Nexthink inventory happens asynchronously in the background. The response does not indicate whether the deletion has been completed.
+
+## Correlation headers
+
+Pass an `x-request-id` header (UUID format) to correlate your calls with Nexthink support logs. The value is echoed back in the response. If you omit it, the API generates and returns one.
+
+<table><thead><tr><th width="137">Header</th><th width="198.3333740234375">Direction</th><th>Description</th></tr></thead><tbody><tr><td><code>x-request-id</code></td><td>Request / Response</td><td>Client-supplied or server-generated correlation UUID.</td></tr><tr><td><code>x-trace-id</code></td><td>Response</td><td>W3C <code>traceparent</code>-derived trace identifier; falls back to <code>x-request-id</code>.</td></tr></tbody></table>
+
+## Error codes
+
+<table><thead><tr><th width="135.6666259765625">HTTP status</th><th width="206">Code</th><th>When</th></tr></thead><tbody><tr><td><code>400</code></td><td><code>EMPTY_REQUEST</code></td><td>The <code>devices</code> array is empty or missing.</td></tr><tr><td><code>400</code></td><td><code>INVALID_REQUEST</code></td><td>Schema validation failed, for example, blank <code>uid</code> or <code>name</code>.</td></tr><tr><td><code>400</code></td><td><code>BATCH_SIZE_EXCEEDED</code></td><td>More than 100 devices submitted in a single request.</td></tr><tr><td><code>400</code></td><td><code>EMPTY_TENANT</code></td><td>Tenant context could not be resolved from the JWT claims.</td></tr><tr><td><code>401</code></td><td>—</td><td>Bearer token is missing or invalid.</td></tr><tr><td><code>403</code></td><td><code>FEATURE_NOT_ENABLED</code></td><td>The Data management API is not enabled for this tenant.</td></tr><tr><td><code>500</code></td><td><code>INTERNAL_ERROR</code></td><td>Unexpected server error. Provide the <code>x-request-id</code> value when contacting support.</td></tr></tbody></table>
+
+
+# Schedule device deletions
+
+Schedule batch deletion of devices from the Nexthink inventory.
+
+## Schedule device deletions
+
+> Schedule the deletion of one or more devices from the Nexthink inventory.\
+> \
+> Each device must be identified by both its \`uid\` and \`name\`. Devices with malformed\
+> UIDs are rejected individually with status \`INVALID\` without failing the rest of the\
+> batch.\
+> \
+> The operation is asynchronous: the API returns \`202 Accepted\` once the deletions are\
+> queued. Actual removal from the inventory happens in the background.<br>
+
+```json
+{"openapi":"3.0.3","info":{"title":"Data Management API","version":"1.0.0"},"tags":[{"name":"device-deletions"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"DeviceDeletionRequest":{"description":"Batch of devices to be deleted from the Nexthink inventory.","type":"object","required":["devices"],"properties":{"devices":{"description":"Non-empty list of devices to delete. The maximum number of devices per request is 100 (configurable per deployment). Split larger deletions into multiple requests.","type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/components/schemas/DeviceEntry"}}}},"DeviceEntry":{"description":"Identifies a single device for deletion.","type":"object","required":["uid","name"],"properties":{"uid":{"description":"UID of the device as reported by the Nexthink Collector. Must be a valid UUID. A malformed value results in a per-device `INVALID` status rather than failing the whole batch.","type":"string","format":"uuid"},"name":{"description":"Name of the device as reported by the Nexthink Collector. Must not be blank.","type":"string","minLength":1}}},"DeviceDeletionResponse":{"description":"Scheduling result for the deletion batch.","type":"object","properties":{"scheduledCount":{"description":"Number of devices successfully queued for deletion.","type":"integer","format":"int32"},"status":{"description":"Overall batch status. Always `ACCEPTED` for a `202` response.","type":"string","enum":["ACCEPTED"]},"devices":{"description":"Per-device scheduling outcome, in the same order as the request.","type":"array","items":{"$ref":"#/components/schemas/DeviceStatus"}}}},"DeviceStatus":{"description":"Scheduling outcome for a single device.","type":"object","properties":{"uid":{"description":"UID of the device as submitted.","type":"string"},"name":{"description":"Name of the device as submitted.","type":"string"},"status":{"description":"Per-device outcome:\n- `SCHEDULED` — deletion queued successfully.\n- `INVALID` — the UID is malformed; the device was skipped. The rest of the batch proceeds.\n- `FAILED` — a downstream error prevented this device from being scheduled.\n","type":"string","enum":["SCHEDULED","INVALID","FAILED"]}}},"ErrorResponse":{"description":"Error details returned with 4xx and 5xx responses.","type":"object","properties":{"code":{"description":"Stable machine-readable error code identifying the failure reason.","type":"string","enum":["EMPTY_REQUEST","BATCH_SIZE_EXCEEDED","INVALID_REQUEST","EMPTY_TENANT","FEATURE_NOT_ENABLED","INTERNAL_ERROR"]},"message":{"description":"Human-readable description of the error.","type":"string"}}}}},"paths":{"/api/v1/data-management/device/deletions":{"post":{"tags":["device-deletions"],"summary":"Schedule device deletions","description":"Schedule the deletion of one or more devices from the Nexthink inventory.\n\nEach device must be identified by both its `uid` and `name`. Devices with malformed\nUIDs are rejected individually with status `INVALID` without failing the rest of the\nbatch.\n\nThe operation is asynchronous: the API returns `202 Accepted` once the deletions are\nqueued. Actual removal from the inventory happens in the background.\n","operationId":"deleteDevices","parameters":[{"name":"x-request-id","in":"header","required":false,"description":"Optional client-supplied correlation identifier (UUID). Echoed back in the response `x-request-id` header. If omitted, the server generates one.","schema":{"type":"string","format":"uuid"}}],"requestBody":{"description":"The batch of devices to delete.","required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DeviceDeletionRequest"}}}},"responses":{"202":{"description":"Deletion batch accepted and queued. Check each device's `status` field — a `202` response does not guarantee all devices were successfully scheduled.","headers":{},"content":{"application/json":{"schema":{"$ref":"#/components/schemas/DeviceDeletionResponse"}}}},"400":{"description":"The request payload is invalid and was not accepted.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"Unauthorized — the bearer token is missing or invalid."},"403":{"description":"Forbidden — the Data Management is not enabled for this tenant.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"500":{"description":"Internal server error. Include the `x-request-id` response header value when contacting Nexthink support.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+
+# Models
+
+## The DeviceDeletionRequest object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Data Management API","version":"1.0.0"},"components":{"schemas":{"DeviceDeletionRequest":{"description":"Batch of devices to be deleted from the Nexthink inventory.","type":"object","required":["devices"],"properties":{"devices":{"description":"Non-empty list of devices to delete. The maximum number of devices per request is 100 (configurable per deployment). Split larger deletions into multiple requests.","type":"array","minItems":1,"maxItems":100,"items":{"$ref":"#/components/schemas/DeviceEntry"}}}},"DeviceEntry":{"description":"Identifies a single device for deletion.","type":"object","required":["uid","name"],"properties":{"uid":{"description":"UID of the device as reported by the Nexthink Collector. Must be a valid UUID. A malformed value results in a per-device `INVALID` status rather than failing the whole batch.","type":"string","format":"uuid"},"name":{"description":"Name of the device as reported by the Nexthink Collector. Must not be blank.","type":"string","minLength":1}}}}}}
+```
+
+## The DeviceEntry object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Data Management API","version":"1.0.0"},"components":{"schemas":{"DeviceEntry":{"description":"Identifies a single device for deletion.","type":"object","required":["uid","name"],"properties":{"uid":{"description":"UID of the device as reported by the Nexthink Collector. Must be a valid UUID. A malformed value results in a per-device `INVALID` status rather than failing the whole batch.","type":"string","format":"uuid"},"name":{"description":"Name of the device as reported by the Nexthink Collector. Must not be blank.","type":"string","minLength":1}}}}}}
+```
+
+## The DeviceDeletionResponse object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Data Management API","version":"1.0.0"},"components":{"schemas":{"DeviceDeletionResponse":{"description":"Scheduling result for the deletion batch.","type":"object","properties":{"scheduledCount":{"description":"Number of devices successfully queued for deletion.","type":"integer","format":"int32"},"status":{"description":"Overall batch status. Always `ACCEPTED` for a `202` response.","type":"string","enum":["ACCEPTED"]},"devices":{"description":"Per-device scheduling outcome, in the same order as the request.","type":"array","items":{"$ref":"#/components/schemas/DeviceStatus"}}}},"DeviceStatus":{"description":"Scheduling outcome for a single device.","type":"object","properties":{"uid":{"description":"UID of the device as submitted.","type":"string"},"name":{"description":"Name of the device as submitted.","type":"string"},"status":{"description":"Per-device outcome:\n- `SCHEDULED` — deletion queued successfully.\n- `INVALID` — the UID is malformed; the device was skipped. The rest of the batch proceeds.\n- `FAILED` — a downstream error prevented this device from being scheduled.\n","type":"string","enum":["SCHEDULED","INVALID","FAILED"]}}}}}}
+```
+
+## The DeviceStatus object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Data Management API","version":"1.0.0"},"components":{"schemas":{"DeviceStatus":{"description":"Scheduling outcome for a single device.","type":"object","properties":{"uid":{"description":"UID of the device as submitted.","type":"string"},"name":{"description":"Name of the device as submitted.","type":"string"},"status":{"description":"Per-device outcome:\n- `SCHEDULED` — deletion queued successfully.\n- `INVALID` — the UID is malformed; the device was skipped. The rest of the batch proceeds.\n- `FAILED` — a downstream error prevented this device from being scheduled.\n","type":"string","enum":["SCHEDULED","INVALID","FAILED"]}}}}}}
+```
+
+## The ErrorResponse object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Data Management API","version":"1.0.0"},"components":{"schemas":{"ErrorResponse":{"description":"Error details returned with 4xx and 5xx responses.","type":"object","properties":{"code":{"description":"Stable machine-readable error code identifying the failure reason.","type":"string","enum":["EMPTY_REQUEST","BATCH_SIZE_EXCEEDED","INVALID_REQUEST","EMPTY_TENANT","FEATURE_NOT_ENABLED","INTERNAL_ERROR"]},"message":{"description":"Human-readable description of the error.","type":"string"}}}}}}
+```
+
+
+# Enrichment
+
+Enrich object data in Nexthink inventory with attributes from outside sources using the Nexthink Enrichment API, allowing you to create integrations with external applications such as ServiceNow or Azure AD.
+
+The Enrichment API allows you to update the values of any number of fields for any object. Enrich object data for manual custom fields (any object) or virtualization fields (devices only).
+
+## Setting up API credentials
+
+To set up an integration with the Nexthink API, you must first create a set of API credentials in your instance that the external application or service will use to access the API. Refer to the [API Credentials](/api) documentation.
+
+## Retrieving object IDs
+
+The API accepts the following IDs:
+
+* `device/device/name`
+* `device/device/uid`
+* `user/user/sid`
+* `user/user/uid`
+* `user/user/upn`
+* `binary/binary/uid`
+* `package/package/uid`
+
+Device name information (`device/device/name`) as well as Windows security identifier (SID) and User Principal Name (UPN) for users (`user/user/sid` and `user/user/upn` respectively) might already exist in the source system.
+
+> You can enable UPN opt-in metric collection at a Collector level using the [Collector Configuration](https://www.nexthink.com/library/collector-configuration) library pack. Only non-anonymized (cleartext) UPN is supported with the API. Library links:
+>
+> * [Set Anonymization Features macOS](https://www.nexthink.com/library/collector-configuration#set-anonymization-features-macos), setting: anonymize\_upn, value: cleartext
+> * [Set Anonymization Features Windows](https://www.nexthink.com/library/collector-configuration#set-anonymization-features-windows), setting: anonymize\_upn, value: 2
+
+Nexthink generates UID fields for all objects. Retrieve them by running [Investigations](https://docs.nexthink.com/platform/latest/investigations) and exporting the UID values to CSV.
+
+## Retrieving field IDs
+
+Depending on your use case, you might want to update device virtualization fields, user Entra ID fields or create custom fields to store the enrichment data. The following sections describe the flow for each use case. Combining both use cases into a single API call is also possible.
+
+The system clears the data by sending an empty string as the value of the field that you want to clear.
+
+### Entra ID
+
+You can enrich the following user Entra ID properties:
+
+* `user/user/ad/city` (string)
+* `user/user/ad/country_code` (string)
+* `user/user/ad/department` (string)
+* `user/user/ad/distinguished_name` (string)
+* `user/user/ad/email_address` (string)
+* `user/user/ad/full_name` (string)
+* `user/user/ad/job_title` (string)
+* `user/user/ad/last_update` (datetime)
+* `user/user/ad/office` (string)
+* `user/user/ad/organizational_unit` (string)
+* `user/user/ad/username` (string)
+
+Find more information on these fields on the [NQL data model](https://docs.nexthink.com/platform/latest/nql-data-model) documentation page.
+
+### Virtualization
+
+You can enrich the following device virtualization properties:
+
+* `device/device/virtualization/desktop_broker` enumeration with the following allowed values:
+  * 0: sets null value
+  * 1: citrix\_cvad
+  * 2: citrix\_daas
+  * 3: azure\_virtual\_desktops
+  * 4: windows\_365
+  * 5: horizon\_on\_prem
+  * 6: aws\_workspace
+  * 7: aws\_appstream
+* `device/device/virtualization/desktop_pool` (string)
+* `device/device/virtualization/disk_image` (string)
+* `device/device/virtualization/environment_name` (string)
+* `device/device/virtualization/hostname` (string)
+* `device/device/virtualization/hypervisor_name` (string)
+* `device/device/virtualization/instance_size` (string)
+* `device/device/virtualization/last_update` (datetime)
+* `device/device/virtualization/region` (string)
+* `device/device/virtualization/type` (enumeration with the following allowed values: 1, 2, 3, corresponding to 1 - shared, 2 - personal, 3 - pooled)
+
+Find more information on these fields on the [NQL data model](https://docs.nexthink.com/platform/latest/nql-data-model) documentation page.
+
+### Configuring device organization
+
+Assign a configurable label `device/device/configuration_tag` to identify a group of devices.
+
+### Configuring user organization
+
+Assign a configurable label `user/user/organization/#<custom_field_name>` to identify a group of users.
+
+### Custom fields
+
+First, create manual custom fields for each object attribute you wish to store, as described in the [Custom fields](https://docs.nexthink.com/platform/latest/custom-fields) documentation. All custom fields are of string type.
+
+Next, create the field ID in the format required by the API as a concatenation of the object type and the NQL ID of the field.
+
+1. Navigate to the custom fields administration page from the main menu.
+2. Find the custom field you need the ID for and click on the action menu on the right side of the row to **Copy NQL ID**.
+3. Paste the NQL ID into another location or tool to continue your work.
+4. The field ID in the format required by the API is the NQL ID with the prefix `<object>/<object>/`.
+
+### Example
+
+If you have defined a custom field on binary objects with the NQL ID `#test_binary`, then its field ID for the API is `binary/binary/#test_binary`.
+
+![](/files/vJWwzTtSJboSle9iHPPK)
+
+
+# Enrich fields for given objects
+
+Enrich object data in the Nexthink inventory with specific information.
+
+## Enrich fields for given objects
+
+> Enrichment can be done for manual custom fields (any object), virtualization fields (devices only), configuration\_tag for devices, the organization field (users only), or the Entra ID fields (users only).<br>
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"tags":[{"name":"enrichment"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"EnrichmentRequest":{"description":"Objects to be enriched (with desired fields and values) and domain (configurable)","type":"object","properties":{"enrichments":{"description":"List of enrichments","type":"array","minimum":1,"maximum":10000,"items":{"$ref":"#/components/schemas/Enrichment"}},"domain":{"description":"Domain for which the given enrichment applies. For information and tracking purposes mainly","minLength":1,"type":"string"}},"required":["enrichments","domain"]},"Enrichment":{"description":"Enrichment composed of the identification information of the desired object and the fields to be enriched (names and values)","type":"object","properties":{"identification":{"description":"List of fields to be used to identify the object","type":"array","minimum":1,"maximum":1,"items":{"$ref":"#/components/schemas/Identification"}},"fields":{"description":"List of fields to be enriched","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/Field"}}},"required":["identification","fields"]},"Identification":{"description":"Identification information for the given object, composed of the name of the field and the value used to identify","type":"object","properties":{"name":{"description":"Name of the field to be used to identify the object","type":"string","enum":["device/device/name","device/device/uid","user/user/sid","user/user/uid","user/user/upn","binary/binary/uid","package/package/uid"]},"value":{"description":"Value to be used to identify the object","type":"string"}},"required":["name","value"]},"Field":{"description":"Enrichment information for the given object, composed of the name of field to be enriched and the desired value","type":"object","properties":{"name":{"description":"Name of the field to be enriched","type":"string","enum":["device/device/configuration_tag","device/device/virtualization/desktop_broker","device/device/virtualization/desktop_pool","device/device/virtualization/disk_image","device/device/virtualization/environment_name","device/device/virtualization/hostname","device/device/virtualization/hypervisor_name","device/device/virtualization/instance_size","device/device/virtualization/last_update","device/device/virtualization/region","device/device/virtualization/type","device/device/#<custom_field_name>","device/device/#<another_custom_field_name>","user/user/ad/city","user/user/ad/country_code","user/user/ad/department","user/user/ad/distinguished_name","user/user/ad/email_address","user/user/ad/full_name","user/user/ad/job_title","user/user/ad/last_update","user/user/ad/office","user/user/ad/organizational_unit","user/user/ad/username","user/user/#<custom_field_name>","binary/binary/#<custom_field_name>","package/package/#<custom_field_name>","user/user/organization/#<custom_field_name>"]},"value":{"description":"Desired value to be used while enriching","oneOf":[{"type":"string"},{"type":"integer"},{"type":"string","format":"date"}]}},"required":["name","value"]},"SuccessResponse":{"description":"Response when ALL objects have been processed correctly","type":"object","properties":{"status":{"description":"Status of the request","type":"string","enum":["success"]}}},"PartialSuccessResponse":{"description":"Partial success response when some of the objects in the request contain errors but other objects are processed","type":"object","properties":{"status":{"description":"Status of the request","type":"string","enum":["partial_success"]},"errors":{"description":"List of all the individual errors for those objects with error","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/IndividualObjectError"}}}},"IndividualObjectError":{"description":"Error for an individual object, composed of identification information about the object and the list of errors","type":"object","properties":{"identification":{"description":"Field to be used to identify the object","type":"array","minimum":1,"maximum":1,"items":{"$ref":"#/components/schemas/Identification"}},"errors":{"description":"List of all the errors for the given object","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/Error"}}}},"Error":{"description":"An error composed of a message and a code","type":"object","properties":{"message":{"description":"Error message with descriptive information about","minLength":1,"type":"string"},"code":{"description":"Internal error code","minLength":1,"type":"string"}}},"BadRequestResponse":{"description":"Error response when ALL objects in the request contain errors","type":"object","properties":{"status":{"description":"Status of the request","type":"string","enum":["error"]},"errors":{"description":"List of all the individual errors for all objects","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/IndividualObjectError"}}}},"ForbiddenResponse":{"description":"Error response when no permissions","type":"object","properties":{"message":{"description":"Error message when no permissions","type":"string"}}}}},"paths":{"/api/v1/enrichment/data/fields":{"post":{"tags":["enrichment"],"summary":"Enrich fields for given objects","description":"Enrichment can be done for manual custom fields (any object), virtualization fields (devices only), configuration_tag for devices, the organization field (users only), or the Entra ID fields (users only).\n","operationId":"enrichmentDataFields","requestBody":{"description":"The different objects to be enriched with the given fields and values used for the enrichment.","required":true,"content":{"application/json":{"schema":{"$ref":"#/components/schemas/EnrichmentRequest"}}}},"responses":{"200":{"description":"Successful enrichment response","content":{"application/json":{"schema":{"$ref":"#/components/schemas/SuccessResponse"}}}},"207":{"description":"Partial success enrichment response - some invalid enrichment, see error codes for details","content":{"application/json":{"schema":{"$ref":"#/components/schemas/PartialSuccessResponse"}}}},"400":{"description":"Bad request - invalid enrichment, see error codes for details","content":{"application/json":{"schema":{"anyOf":[{"$ref":"#/components/schemas/BadRequestResponse"},{"$ref":"#/components/schemas/Error"}]}}}},"401":{"description":"Unauthorized - invalid authentication credentials"},"403":{"description":"Forbidden - no permission to trigger enrichment","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ForbiddenResponse"}}}}}}}}}
+```
+
+
+# Models
+
+## The BadRequestResponse object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"BadRequestResponse":{"description":"Error response when ALL objects in the request contain errors","type":"object","properties":{"status":{"description":"Status of the request","type":"string","enum":["error"]},"errors":{"description":"List of all the individual errors for all objects","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/IndividualObjectError"}}}},"IndividualObjectError":{"description":"Error for an individual object, composed of identification information about the object and the list of errors","type":"object","properties":{"identification":{"description":"Field to be used to identify the object","type":"array","minimum":1,"maximum":1,"items":{"$ref":"#/components/schemas/Identification"}},"errors":{"description":"List of all the errors for the given object","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/Error"}}}},"Identification":{"description":"Identification information for the given object, composed of the name of the field and the value used to identify","type":"object","properties":{"name":{"description":"Name of the field to be used to identify the object","type":"string","enum":["device/device/name","device/device/uid","user/user/sid","user/user/uid","user/user/upn","binary/binary/uid","package/package/uid"]},"value":{"description":"Value to be used to identify the object","type":"string"}},"required":["name","value"]},"Error":{"description":"An error composed of a message and a code","type":"object","properties":{"message":{"description":"Error message with descriptive information about","minLength":1,"type":"string"},"code":{"description":"Internal error code","minLength":1,"type":"string"}}}}}}
+```
+
+## The Enrichment object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"Enrichment":{"description":"Enrichment composed of the identification information of the desired object and the fields to be enriched (names and values)","type":"object","properties":{"identification":{"description":"List of fields to be used to identify the object","type":"array","minimum":1,"maximum":1,"items":{"$ref":"#/components/schemas/Identification"}},"fields":{"description":"List of fields to be enriched","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/Field"}}},"required":["identification","fields"]},"Identification":{"description":"Identification information for the given object, composed of the name of the field and the value used to identify","type":"object","properties":{"name":{"description":"Name of the field to be used to identify the object","type":"string","enum":["device/device/name","device/device/uid","user/user/sid","user/user/uid","user/user/upn","binary/binary/uid","package/package/uid"]},"value":{"description":"Value to be used to identify the object","type":"string"}},"required":["name","value"]},"Field":{"description":"Enrichment information for the given object, composed of the name of field to be enriched and the desired value","type":"object","properties":{"name":{"description":"Name of the field to be enriched","type":"string","enum":["device/device/configuration_tag","device/device/virtualization/desktop_broker","device/device/virtualization/desktop_pool","device/device/virtualization/disk_image","device/device/virtualization/environment_name","device/device/virtualization/hostname","device/device/virtualization/hypervisor_name","device/device/virtualization/instance_size","device/device/virtualization/last_update","device/device/virtualization/region","device/device/virtualization/type","device/device/#<custom_field_name>","device/device/#<another_custom_field_name>","user/user/ad/city","user/user/ad/country_code","user/user/ad/department","user/user/ad/distinguished_name","user/user/ad/email_address","user/user/ad/full_name","user/user/ad/job_title","user/user/ad/last_update","user/user/ad/office","user/user/ad/organizational_unit","user/user/ad/username","user/user/#<custom_field_name>","binary/binary/#<custom_field_name>","package/package/#<custom_field_name>","user/user/organization/#<custom_field_name>"]},"value":{"description":"Desired value to be used while enriching","oneOf":[{"type":"string"},{"type":"integer"},{"type":"string","format":"date"}]}},"required":["name","value"]}}}}
+```
+
+## The EnrichmentRequest object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"EnrichmentRequest":{"description":"Objects to be enriched (with desired fields and values) and domain (configurable)","type":"object","properties":{"enrichments":{"description":"List of enrichments","type":"array","minimum":1,"maximum":10000,"items":{"$ref":"#/components/schemas/Enrichment"}},"domain":{"description":"Domain for which the given enrichment applies. For information and tracking purposes mainly","minLength":1,"type":"string"}},"required":["enrichments","domain"]},"Enrichment":{"description":"Enrichment composed of the identification information of the desired object and the fields to be enriched (names and values)","type":"object","properties":{"identification":{"description":"List of fields to be used to identify the object","type":"array","minimum":1,"maximum":1,"items":{"$ref":"#/components/schemas/Identification"}},"fields":{"description":"List of fields to be enriched","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/Field"}}},"required":["identification","fields"]},"Identification":{"description":"Identification information for the given object, composed of the name of the field and the value used to identify","type":"object","properties":{"name":{"description":"Name of the field to be used to identify the object","type":"string","enum":["device/device/name","device/device/uid","user/user/sid","user/user/uid","user/user/upn","binary/binary/uid","package/package/uid"]},"value":{"description":"Value to be used to identify the object","type":"string"}},"required":["name","value"]},"Field":{"description":"Enrichment information for the given object, composed of the name of field to be enriched and the desired value","type":"object","properties":{"name":{"description":"Name of the field to be enriched","type":"string","enum":["device/device/configuration_tag","device/device/virtualization/desktop_broker","device/device/virtualization/desktop_pool","device/device/virtualization/disk_image","device/device/virtualization/environment_name","device/device/virtualization/hostname","device/device/virtualization/hypervisor_name","device/device/virtualization/instance_size","device/device/virtualization/last_update","device/device/virtualization/region","device/device/virtualization/type","device/device/#<custom_field_name>","device/device/#<another_custom_field_name>","user/user/ad/city","user/user/ad/country_code","user/user/ad/department","user/user/ad/distinguished_name","user/user/ad/email_address","user/user/ad/full_name","user/user/ad/job_title","user/user/ad/last_update","user/user/ad/office","user/user/ad/organizational_unit","user/user/ad/username","user/user/#<custom_field_name>","binary/binary/#<custom_field_name>","package/package/#<custom_field_name>","user/user/organization/#<custom_field_name>"]},"value":{"description":"Desired value to be used while enriching","oneOf":[{"type":"string"},{"type":"integer"},{"type":"string","format":"date"}]}},"required":["name","value"]}}}}
+```
+
+## The Error object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"Error":{"description":"An error composed of a message and a code","type":"object","properties":{"message":{"description":"Error message with descriptive information about","minLength":1,"type":"string"},"code":{"description":"Internal error code","minLength":1,"type":"string"}}}}}}
+```
+
+## The Field object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"Field":{"description":"Enrichment information for the given object, composed of the name of field to be enriched and the desired value","type":"object","properties":{"name":{"description":"Name of the field to be enriched","type":"string","enum":["device/device/configuration_tag","device/device/virtualization/desktop_broker","device/device/virtualization/desktop_pool","device/device/virtualization/disk_image","device/device/virtualization/environment_name","device/device/virtualization/hostname","device/device/virtualization/hypervisor_name","device/device/virtualization/instance_size","device/device/virtualization/last_update","device/device/virtualization/region","device/device/virtualization/type","device/device/#<custom_field_name>","device/device/#<another_custom_field_name>","user/user/ad/city","user/user/ad/country_code","user/user/ad/department","user/user/ad/distinguished_name","user/user/ad/email_address","user/user/ad/full_name","user/user/ad/job_title","user/user/ad/last_update","user/user/ad/office","user/user/ad/organizational_unit","user/user/ad/username","user/user/#<custom_field_name>","binary/binary/#<custom_field_name>","package/package/#<custom_field_name>","user/user/organization/#<custom_field_name>"]},"value":{"description":"Desired value to be used while enriching","oneOf":[{"type":"string"},{"type":"integer"},{"type":"string","format":"date"}]}},"required":["name","value"]}}}}
+```
+
+## The ForbiddenResponse object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"ForbiddenResponse":{"description":"Error response when no permissions","type":"object","properties":{"message":{"description":"Error message when no permissions","type":"string"}}}}}}
+```
+
+## The Identification object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"Identification":{"description":"Identification information for the given object, composed of the name of the field and the value used to identify","type":"object","properties":{"name":{"description":"Name of the field to be used to identify the object","type":"string","enum":["device/device/name","device/device/uid","user/user/sid","user/user/uid","user/user/upn","binary/binary/uid","package/package/uid"]},"value":{"description":"Value to be used to identify the object","type":"string"}},"required":["name","value"]}}}}
+```
+
+## The IndividualObjectError object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"IndividualObjectError":{"description":"Error for an individual object, composed of identification information about the object and the list of errors","type":"object","properties":{"identification":{"description":"Field to be used to identify the object","type":"array","minimum":1,"maximum":1,"items":{"$ref":"#/components/schemas/Identification"}},"errors":{"description":"List of all the errors for the given object","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/Error"}}}},"Identification":{"description":"Identification information for the given object, composed of the name of the field and the value used to identify","type":"object","properties":{"name":{"description":"Name of the field to be used to identify the object","type":"string","enum":["device/device/name","device/device/uid","user/user/sid","user/user/uid","user/user/upn","binary/binary/uid","package/package/uid"]},"value":{"description":"Value to be used to identify the object","type":"string"}},"required":["name","value"]},"Error":{"description":"An error composed of a message and a code","type":"object","properties":{"message":{"description":"Error message with descriptive information about","minLength":1,"type":"string"},"code":{"description":"Internal error code","minLength":1,"type":"string"}}}}}}
+```
+
+## The PartialSuccessResponse object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"PartialSuccessResponse":{"description":"Partial success response when some of the objects in the request contain errors but other objects are processed","type":"object","properties":{"status":{"description":"Status of the request","type":"string","enum":["partial_success"]},"errors":{"description":"List of all the individual errors for those objects with error","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/IndividualObjectError"}}}},"IndividualObjectError":{"description":"Error for an individual object, composed of identification information about the object and the list of errors","type":"object","properties":{"identification":{"description":"Field to be used to identify the object","type":"array","minimum":1,"maximum":1,"items":{"$ref":"#/components/schemas/Identification"}},"errors":{"description":"List of all the errors for the given object","type":"array","minimum":1,"items":{"$ref":"#/components/schemas/Error"}}}},"Identification":{"description":"Identification information for the given object, composed of the name of the field and the value used to identify","type":"object","properties":{"name":{"description":"Name of the field to be used to identify the object","type":"string","enum":["device/device/name","device/device/uid","user/user/sid","user/user/uid","user/user/upn","binary/binary/uid","package/package/uid"]},"value":{"description":"Value to be used to identify the object","type":"string"}},"required":["name","value"]},"Error":{"description":"An error composed of a message and a code","type":"object","properties":{"message":{"description":"Error message with descriptive information about","minLength":1,"type":"string"},"code":{"description":"Internal error code","minLength":1,"type":"string"}}}}}}
+```
+
+## The SuccessResponse object
+
+```json
+{"openapi":"3.0.3","info":{"title":"Enrichment API","version":"1.31.0"},"components":{"schemas":{"SuccessResponse":{"description":"Response when ALL objects have been processed correctly","type":"object","properties":{"status":{"description":"Status of the request","type":"string","enum":["success"]}}}}}}
+```
+
+
+# NQL
+
+The NQL API allows you to extract data from the Nexthink cloud platform, giving you the flexibility to create and visualize metrics using external applications.
+
+### Setting up API credentials
+
+To set up an integration using the Nexthink API, you must first create a set of dedicated credentials in your instance for your application or service. Refer to the [API Credentials](/api) documentation.
+
+#### Permissions
+
+To enable proper permissions for NQL API queries:
+
+1. Select **Administration** from the main menu.
+2. Click on **Profile** from the navigation panel.
+3. Click on the **New Profile** button to create a new profile or edit an existing profile by hovering over it and clicking on the edit icon to change the profile configuration.
+4. In the **Permissions** section, scroll down to the **Administration** section and select **Manage all NQL API queries** to enable appropriate permissions for the profile.
+
+Refer to the [Profiles](https://docs.nexthink.com/platform/latest/creating-a-profile) documentation for a detailed description of the permission options.
+
+### Preparing queries
+
+The NQL API executes predefined queries using the Nexthink web interface. Each query gets a unique ID, a required parameter for every API call.
+
+**Accessing NQL API queries**
+
+![Accessing NQL API queries](/files/Xnm9yJ4108okPgjd7q4x)
+
+1. Log in to the Nexthink web interface.
+2. Select **Administration** from the main menu.
+3. Click on **NQL API queries** in the navigation panel in the Content Management section.
+
+**Managing NQL API queries**
+
+![Configure NQL Query](/files/mz5nLsCbaWp5gZ74RGlA)
+
+1. Create a new NQL API query by clicking on the **New NQL API query** button in the top-right corner of the page.
+2. Edit an existing query by hovering over it to reveal the action menu on the right side, click on it and select the **Edit** option.
+3. Use the **Delete** option from the action menu to permanently delete a saved query.
+
+**Configuring an NQL API query**
+
+![Configure NQL Query](/files/cWPFPgxZNFEiFJqnZoZm)
+
+* **Name:** Enter the name as you would like it to appear on the list of queries.
+* **Query ID:** Enter an identifier for the query. Once you have created the query, you can no longer change the Query ID.
+* **Description (optional):** Enter a description to help others understand the meaning and purpose of the query.
+* **NQL query:** Write the NQL query to execute. Refer to the [NQL](https://docs.nexthink.com/platform/latest/nexthink-query-language-nql) documentation for more information.
+
+#### Parameterized NQL queries
+
+Parameterized NQL queries allow you to place parameters on a query instead of including a constant value. The system uses placeholders for parameters and provides the parameter value during execution. This approach allows you to reuse the query with different values for different purposes. For example, use a parameterized query to get the number of hard resets on a device, with a different device each time. With this generalized approach, you don’t need to write a separate query for each device.
+
+Create a parameterized query:
+
+1. Create a new NQL API query or edit an existing one.
+2. Write an NQL query and explicitly name the parameters in the `where` clause. Parameters are allowed only in the `where` clause.
+3. The parameter name must begin with a single `$` character and must be unique within the scope of the query.
+4. The parameter datatype is inferred upon query execution.
+
+```
+execution.crashes during past 240h
+| where device.collector.uid == $collector_uid
+| summarize c1 = number_of_crashes.sum()
+```
+
+In the example above, `$collector_uid` is the placeholder for a Collector UID. Provide the UID value upon query execution.
+
+### Choosing the right endpoint
+
+The NQL API provides two separate endpoints to start the execution of a query:
+
+* **api/v2/nql/execute** - highly optimized for relatively small requests at a high frequency.
+* **api/v1/nql/export** - optimized for large queries at a low frequency.
+
+The `execute` operation returns the results immediately in the response, however the `export` operation, since it is a longer and heavier operation, returns an identifier whose status you can consult at the following endpoint:
+
+* **api/v1/nql/status/{exportId}** - Retrieves the status of an export and the URL link to a file containing the results once the execution is COMPLETE. For security, the URL link is only valid and accessible for 15 minutes after generation.
+
+Suggested example use cases for each endpoint:
+
+| Example                                            | Endpoint         |
+| -------------------------------------------------- | ---------------- |
+| Get a list of all devices, packages or executions. | `api/v1/export`  |
+| Get detailed information about an execution.       | `api/v2/execute` |
+| Integrate with a chatbot or self-service portal.   | `api/v2/execute` |
+| Create a daily dashboard with operation data.      | `api/v1/export`  |
+
+Both endpoints support the execution of the same NQL queries. However, the limits that apply to each NQL API endpoint are different. See the Limitations section below.
+
+### Output formats
+
+The `execute` operation supports both CSV and JSON formats.
+
+The `status` endpoint associated with the `export` operation provides a URL to download a CSV file that contains the actual result of the NQL query.
+
+### Limits
+
+Nexthink makes continuous improvements to NQL to ensure optimal performance of all requests. Refer to the [Nexthink Infinity thresholds and limits overview](https://edocs.nexthink.com/nexthink-infinity/infinity-specifications/nexthink-infinity-default-thresholds-overview) for the list of the most up-to-date limits.
+
+Nexthink aims to maintain optimal service performance. In the case of excessive and rapid acceleration of API use, Nexthink may temporarily pause access to the NQL API on a per-tenant basis.
+
+### Supported compression algorithms
+
+NQL Analytical API exports now support file compression using the GZIP and ZSTD algorithms, enabling faster downloads and smaller file sizes.
+
+### Reduce throttling errors
+
+Consider the following best practices to avoid throttling:
+
+#### Targeted queries
+
+Use filters to target your query to only the data you need. For example, if you want information about a specific device, use the `where` clause to restrict the returned data to only that device.
+
+#### Catch errors caused by rate limiting
+
+When throttling occurs, the API returns the HTTP status code 429, and the requests fail. It is best practice to catch 429 responses in your code and retry the request after a suitable waiting period. Refer to the value specified in the *Retry-After* header from the response.
+
+#### Reducing the number of API requests
+
+Optimize your code to eliminate any unnecessary API calls and cache frequently used data.
+
+#### Regulate the request rate
+
+If you regularly approach or bump into the rate limit, consider including a process in your code that regulates the rate of your requests so that they are more evenly distributed over time.
+
+### Example
+
+A set of utilities for different programming languages is available to integrate with `execute` and `export` operations. Below is an example of how to use PowerShell scripts and Power BI queries.
+
+#### PowerShell
+
+A collection of scripts compatible with PowerShell 7.2 (LTS) is available. These scripts enable customization of authentication credentials, NQL queries, parameters, output directory, file name, and format, as outlined in the [output](#output-formats) formats section.
+
+* Execute NQL queries: [PowerShell script for `execute` operation](https://download.nexthink.com/integrations/NQL+API+Utils/PowerShell/nql_api_interactive.ps1)
+* Export NQL query results: [PowerShell script for `export` operation](https://download.nexthink.com/integrations/NQL+API+Utils/PowerShell/nql_api_analytics.ps1)
+
+#### Power BI
+
+Nexthink offers two Power BI connectors as examples for connecting to the NQL API. These connectors allow the customization of authentication credentials, NQL queries, and parameters.
+
+To start integration with NQL API, follow these steps:
+
+* Install the custom connector from Power BI Desktop. Refer to the [Microsoft Power BI documentation](https://learn.microsoft.com/en-us/power-query/install-sdk#power-bi-desktop) for detailed installation instructions.<br>
+* Open Power BI Desktop and click on **Get Data** in the toolbar.<br>
+
+![Custom connectors in Power BI Desktop](/files/OKFFXLNjD2xiKJCvp6fR)<br>
+
+* Type **Nexthink** in the search field to select the desired custom connector from the results.
+* Click the **Connect** button. The configuration tab appears.
+* Enter the necessary data and then click the **OK** buttom.<br>
+
+![Custom connector configuration](/files/dcit4GXzOdix8ZoVyZHB)
+
+Use custom connectors to:
+
+* Execute NQL queries: [Power BI query custom connector for `execute` operation](https://download.nexthink.com/integrations/NQL+API+Utils/PowerBI/Nexthink-Interactive.mez)
+* Export NQL results: [Power BI query custom connector for `export` operation](https://download.nexthink.com/integrations/NQL+API+Utils/PowerBI/Nexthink-Analytics.mez)
+
+
+# Execute an NQL
+
+Execute NQL queries and retrieve data in JSON or CSV format
+
+## Execute an NQL V1
+
+> Executes an NQL query and returns the results.
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"tags":[{"name":"Execute"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"NqlApiExecuteRequest":{"required":["queryId"],"type":"object","properties":{"queryId":{"maxLength":255,"minLength":1,"pattern":"^#[a-z0-9_]{2,255}$","type":"string","description":"Identifier of the query which is going to be executed."},"parameters":{"type":"object","additionalProperties":{"type":"string"},"description":"Key and value of the parameters to be replaced within the NQL query in order to compose a final query for execution. Example: {\\\"alert_name\\\": \\\"my_alert\\\", \\\"alert_status\\\": \\\"Open\\\"}\""}}},"NqlApiExecuteResponse":{"type":"object","properties":{"queryId":{"type":"string","description":"Identifier of the executed query"},"executedQuery":{"type":"string","description":"Final query executed with the replaced parameters."},"rows":{"type":"integer","description":"Number of rows returned","format":"int64"},"executionDateTime":{"allOf":[{"$ref":"#/components/schemas/DateTime"},{"type":"object","description":"Date and time of the execution"}]},"headers":{"type":"array","description":"Ordered list with the headers of the returned fields.","items":{"type":"string"}},"data":{"type":"array","description":"List of rows with the data returned by the query execution.","items":{"type":"array","items":{"type":"object"}}}}},"DateTime":{"type":"object","properties":{"year":{"type":"integer","format":"int64"},"month":{"type":"integer","format":"int64"},"day":{"type":"integer","format":"int64"},"hour":{"type":"integer","format":"int64"},"minute":{"type":"integer","format":"int64"},"second":{"type":"integer","format":"int64"}}},"ErrorResponse":{"type":"object","properties":{"message":{"type":"string","description":"Message with the description of the error."},"code":{"type":"integer","description":"Error code","format":"int32"},"source":{"type":"string","description":"Source of the error, if any."}}}}},"paths":{"/api/v1/nql/execute":{"post":{"tags":["Execute"],"summary":"Execute an NQL V1","description":"Executes an NQL query and returns the results.","operationId":"execute","parameters":[{"name":"Authorization","in":"header","schema":{"type":"string","nullable":false}},{"name":"Accept","description":"Set the header to `application/json` for a JSON response or `text/csv` for a CSV response. If no value is set, `application/json` applied by default. Otherwise, 406 error (not acceptable) is returned.","in":"header","schema":{"type":"string","nullable":true}},{"name":"x-utc-times","description":"Set the header to `true` for UTC timezone. With any other value, regional timezone is applied by default.","in":"header","schema":{"type":"string","nullable":true}}],"requestBody":{"description":"The configuration of the execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiExecuteRequest"}}},"required":true},"responses":{"200":{"description":"OK - Successful execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiExecuteResponse"}},"text/csv":{"schema":{"type":"string"}}}},"401":{"description":"Unauthorized - No valid authentication credentials."},"403":{"description":"No permission - Not authorized to execute queries.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"Not found - No query associated with that ID."},"406":{"description":"Not Acceptable. The Accept header should be \"application/json\", \"text/csv\" or empty."},"500":{"description":"Internal server error.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"503":{"description":"Service unavailable."}}}}}}
+```
+
+## Execute an NQL V2
+
+> Executes an NQL query and returns the results.
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"tags":[{"name":"Execute"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"NqlApiExecuteRequest":{"required":["queryId"],"type":"object","properties":{"queryId":{"maxLength":255,"minLength":1,"pattern":"^#[a-z0-9_]{2,255}$","type":"string","description":"Identifier of the query which is going to be executed."},"parameters":{"type":"object","additionalProperties":{"type":"string"},"description":"Key and value of the parameters to be replaced within the NQL query in order to compose a final query for execution. Example: {\\\"alert_name\\\": \\\"my_alert\\\", \\\"alert_status\\\": \\\"Open\\\"}\""}}},"NqlApiExecuteV2Response":{"type":"object","properties":{"queryId":{"type":"string","description":"Identifier of the executed query"},"executedQuery":{"type":"string","description":"Final query executed with the parameters replaced"},"rows":{"type":"integer","description":"Number of rows returned","format":"int64"},"executionDateTime":{"type":"string","description":"Date and time of the execution in ISO format"},"data":{"type":"array","description":"List of rows with the data returned by the query execution","items":{"type":"object","properties":{"key1":{},"key2":{}}}}}},"ErrorResponse":{"type":"object","properties":{"message":{"type":"string","description":"Message with the description of the error."},"code":{"type":"integer","description":"Error code","format":"int32"},"source":{"type":"string","description":"Source of the error, if any."}}}}},"paths":{"/api/v2/nql/execute":{"post":{"tags":["Execute"],"summary":"Execute an NQL V2","description":"Executes an NQL query and returns the results.","operationId":"execute","parameters":[{"name":"Authorization","in":"header","schema":{"type":"string","nullable":false}},{"name":"Accept","description":"Set the header to `application/json` for a response or `text/csv` for a CSV response. If no value is set, `application/json` is applied by default. Otherwise, 406 error (not acceptable) is returned.","in":"header","schema":{"type":"string","nullable":true}},{"name":"x-utc-times","description":"Set the header to `true` for UTC timezone. With any other value, regional timezone is applied by default.","in":"header","schema":{"type":"string","nullable":true}}],"requestBody":{"description":"The configuration of the execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiExecuteRequest"}}},"required":true},"responses":{"200":{"description":"OK - Successful execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiExecuteV2Response"}},"text/csv":{"schema":{"type":"string"}}}},"401":{"description":"Unauthorized - No valid authentication credentials."},"403":{"description":"No permission - Not authorized to execute queries","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"Not found - No query associated with that ID"},"406":{"description":"Not Acceptable - The accept header should be \"application/json\", \"text/csv\" or empty"},"500":{"description":"Internal server error","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"503":{"description":"Service unavailable"}}}}}}
+```
+
+
+# Export an NQL
+
+Export large datasets to S3 and track export status
+
+## Export an NQL
+
+> Starts the execution of a query that will finish with the export of the results to a file in S3. The service response contains an identifier that can be used in the "status" operation to obtain the URL of the file with the results.
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"tags":[{"name":"Export"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"NqlApiExportResponse":{"type":"object","properties":{"exportId":{"type":"string","description":"Export identifier to be used in the \"status\" operation to know the state of the export and to retrieve the URL of the file with the results."}}},"ErrorResponse":{"type":"object","properties":{"message":{"type":"string","description":"Message with the description of the error."},"code":{"type":"integer","description":"Error code","format":"int32"},"source":{"type":"string","description":"Source of the error, if any."}}}}},"paths":{"/api/v1/nql/export":{"get":{"tags":["Export"],"summary":"Export an NQL","description":"Starts the execution of a query that will finish with the export of the results to a file in S3. The service response contains an identifier that can be used in the \"status\" operation to obtain the URL of the file with the results.","operationId":"export-get","parameters":[{"name":"queryId","in":"query","description":"Identifier of the query which is going to be executed.","required":true,"schema":{"type":"string"}},{"name":"parameters","in":"query","description":"Key and value of the parameters to be replaced within the NQL query in order to compose a final query for execution. Example: {\\\"alert_name\\\": \\\"my_alert\\\", \\\"alert_status\\\": \\\"Open\\\"}\"","required":false,"schema":{"type":"object","additionalProperties":{"type":"string"}}},{"name":"compression","in":"query","description":"The compression algorithm for the export. If not set, no compression is applied. Allowed values: `NONE`, `ZSTD`, `GZIP`.","required":false,"schema":{"type":"string"}},{"name":"Authorization","in":"header","schema":{"type":"string","nullable":false}}],"responses":{"200":{"description":"OK - Successful execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiExportResponse"}}}},"401":{"description":"Unauthorized - No valid authentication credentials."},"403":{"description":"No permission - Not authorized to execute queries.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"Not found - No query associated with that ID."},"500":{"description":"Internal server error.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"503":{"description":"Service unavailable."}}}}}}
+```
+
+## Export an NQL
+
+> Starts the execution of a query that will finish with the export of the results to a file in S3. The service response contains an identifier that can be used in the "status" operation to obtain the URL of the file with the results.
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"tags":[{"name":"Export"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"NqlApiExportRequest":{"required":["queryId"],"type":"object","properties":{"queryId":{"maxLength":255,"minLength":1,"pattern":"^#[a-z0-9_]{2,255}$","type":"string","description":"Identifier of the query which is going to be executed."},"parameters":{"type":"object","additionalProperties":{"type":"string"},"description":"Key and value of the parameters to be replaced within the NQL query in order to compose a final query for execution. Example: {\\\"alert_name\\\": \\\"my_alert\\\", \\\"alert_status\\\": \\\"Open\\\"}\""},"compression":{"type":"string","description":"The compression algorithm for the export. If not set, no compression is applied.","enum":["ZSTD","GZIP","NONE"],"nullable":true}}},"NqlApiExportResponse":{"type":"object","properties":{"exportId":{"type":"string","description":"Export identifier to be used in the \"status\" operation to know the state of the export and to retrieve the URL of the file with the results."}}},"ErrorResponse":{"type":"object","properties":{"message":{"type":"string","description":"Message with the description of the error."},"code":{"type":"integer","description":"Error code","format":"int32"},"source":{"type":"string","description":"Source of the error, if any."}}}}},"paths":{"/api/v1/nql/export":{"post":{"tags":["Export"],"summary":"Export an NQL","description":"Starts the execution of a query that will finish with the export of the results to a file in S3. The service response contains an identifier that can be used in the \"status\" operation to obtain the URL of the file with the results.","operationId":"export-post","parameters":[{"name":"Authorization","in":"header","schema":{"type":"string","nullable":false}}],"requestBody":{"description":"The configuration of the execution","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiExportRequest"}}},"required":true},"responses":{"200":{"description":"OK - Successful execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiExportResponse"}}}},"401":{"description":"Unauthorized - No valid authentication credentials."},"403":{"description":"No permission - Not authorized to execute queries","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"Not found - No query associated with that ID."},"500":{"description":"Internal server error.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"503":{"description":"Service unavailable."}}}}}}
+```
+
+## Status of an export
+
+> Retrieve the status of an export given its identifier.
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"tags":[{"name":"Export"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"NqlApiStatusResponse":{"type":"object","properties":{"status":{"type":"string","description":"Status of the export","enum":["SUBMITTED","IN_PROGRESS","ERROR","COMPLETED"],"nullable":false},"resultsFileUrl":{"type":"string","description":"URL of the file with the content once the export has been completed.","nullable":true},"errorDescription":{"type":"string","description":"Message with the description of the error.","nullable":true}}},"ErrorResponse":{"type":"object","properties":{"message":{"type":"string","description":"Message with the description of the error."},"code":{"type":"integer","description":"Error code","format":"int32"},"source":{"type":"string","description":"Source of the error, if any."}}}}},"paths":{"/api/v1/nql/status/{exportId}":{"get":{"tags":["Export"],"summary":"Status of an export","description":"Retrieve the status of an export given its identifier.","operationId":"status","parameters":[{"name":"exportId","in":"path","description":"Export identifier","required":true,"schema":{"type":"string","nullable":false}},{"name":"Authorization","in":"header","schema":{"type":"string","nullable":false}}],"responses":{"200":{"description":"OK - Successful execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiStatusResponse"}}},"headers":{}},"206":{"description":"Partial Content - The query results were truncated because the maximum number of results allowed by the license was reached","content":{"application/json":{"schema":{"$ref":"#/components/schemas/NqlApiStatusResponse"}}},"headers":{}},"401":{"description":"Unauthorized - No valid authentication credentials."},"403":{"description":"No permission - Not authorized to execute queries.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"Not found - No export associated with that ID."},"429":{"description":"Too many requests - The user has reached the daily request limit.","headers":{"retry-after":{"schema":{"type":"string"},"description":"The date and time the client should wait before retrying the request."}}},"500":{"description":"Internal server error.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"503":{"description":"Service unavailable."}}}}}}
+```
+
+
+# Models
+
+## The DateTime object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"DateTime":{"type":"object","properties":{"year":{"type":"integer","format":"int64"},"month":{"type":"integer","format":"int64"},"day":{"type":"integer","format":"int64"},"hour":{"type":"integer","format":"int64"},"minute":{"type":"integer","format":"int64"},"second":{"type":"integer","format":"int64"}}}}}}
+```
+
+## The ErrorResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"ErrorResponse":{"type":"object","properties":{"message":{"type":"string","description":"Message with the description of the error."},"code":{"type":"integer","description":"Error code","format":"int32"},"source":{"type":"string","description":"Source of the error, if any."}}}}}}
+```
+
+## The NqlApiExecuteRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"NqlApiExecuteRequest":{"required":["queryId"],"type":"object","properties":{"queryId":{"maxLength":255,"minLength":1,"pattern":"^#[a-z0-9_]{2,255}$","type":"string","description":"Identifier of the query which is going to be executed."},"parameters":{"type":"object","additionalProperties":{"type":"string"},"description":"Key and value of the parameters to be replaced within the NQL query in order to compose a final query for execution. Example: {\\\"alert_name\\\": \\\"my_alert\\\", \\\"alert_status\\\": \\\"Open\\\"}\""}}}}}}
+```
+
+## The NqlApiExportRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"NqlApiExportRequest":{"required":["queryId"],"type":"object","properties":{"queryId":{"maxLength":255,"minLength":1,"pattern":"^#[a-z0-9_]{2,255}$","type":"string","description":"Identifier of the query which is going to be executed."},"parameters":{"type":"object","additionalProperties":{"type":"string"},"description":"Key and value of the parameters to be replaced within the NQL query in order to compose a final query for execution. Example: {\\\"alert_name\\\": \\\"my_alert\\\", \\\"alert_status\\\": \\\"Open\\\"}\""},"compression":{"type":"string","description":"The compression algorithm for the export. If not set, no compression is applied.","enum":["ZSTD","GZIP","NONE"],"nullable":true}}}}}}
+```
+
+## The NqlApiExecuteResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"NqlApiExecuteResponse":{"type":"object","properties":{"queryId":{"type":"string","description":"Identifier of the executed query"},"executedQuery":{"type":"string","description":"Final query executed with the replaced parameters."},"rows":{"type":"integer","description":"Number of rows returned","format":"int64"},"executionDateTime":{"allOf":[{"$ref":"#/components/schemas/DateTime"},{"type":"object","description":"Date and time of the execution"}]},"headers":{"type":"array","description":"Ordered list with the headers of the returned fields.","items":{"type":"string"}},"data":{"type":"array","description":"List of rows with the data returned by the query execution.","items":{"type":"array","items":{"type":"object"}}}}},"DateTime":{"type":"object","properties":{"year":{"type":"integer","format":"int64"},"month":{"type":"integer","format":"int64"},"day":{"type":"integer","format":"int64"},"hour":{"type":"integer","format":"int64"},"minute":{"type":"integer","format":"int64"},"second":{"type":"integer","format":"int64"}}}}}}
+```
+
+## The NqlApiExportResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"NqlApiExportResponse":{"type":"object","properties":{"exportId":{"type":"string","description":"Export identifier to be used in the \"status\" operation to know the state of the export and to retrieve the URL of the file with the results."}}}}}}
+```
+
+## The NqlApiStatusResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"NqlApiStatusResponse":{"type":"object","properties":{"status":{"type":"string","description":"Status of the export","enum":["SUBMITTED","IN_PROGRESS","ERROR","COMPLETED"],"nullable":false},"resultsFileUrl":{"type":"string","description":"URL of the file with the content once the export has been completed.","nullable":true},"errorDescription":{"type":"string","description":"Message with the description of the error.","nullable":true}}}}}}
+```
+
+## The NqlApiExecuteV2Response object
+
+```json
+{"openapi":"3.0.1","info":{"title":"NQL API","version":"1.2.0"},"components":{"schemas":{"NqlApiExecuteV2Response":{"type":"object","properties":{"queryId":{"type":"string","description":"Identifier of the executed query"},"executedQuery":{"type":"string","description":"Final query executed with the parameters replaced"},"rows":{"type":"integer","description":"Number of rows returned","format":"int64"},"executionDateTime":{"type":"string","description":"Date and time of the execution in ISO format"},"data":{"type":"array","description":"List of rows with the data returned by the query execution","items":{"type":"object","properties":{"key1":{},"key2":{}}}}}}}}}
+```
+
+
+# Remote Actions
+
+Trigger and query remote actions using the Nexthink API, allowing you to create integrations with external applications like ServiceNow.
+
+{% hint style="info" %}
+For the execute calls, obtain the Collector IDs using the [data export](https://docs.nexthink.com/platform/latest/data-export) or the [CSV export](https://docs.nexthink.com/platform/latest/investigations). In the future, the upcoming NQL API will allow you to fetch those IDs directly.
+{% endhint %}
+
+## Setting up API credentials
+
+To set up an integration with the Nexthink API, you must first create a set of API credentials in your instance that the external application or service uses to access the API and send requests to Remote Actions. For more information, refer to the [API Credentials](/api) documentation.
+
+## Configuring remote actions for API
+
+1. Create a new remote action or edit an existing one as described in the [Manage Remote Actions](https://docs.nexthink.com/platform/latest/manage-remote-actions) documentation.
+2. Under the **General** tab, select the **API** check box.
+3. Click on the **Save Remote Action** button.<br>
+
+<figure><img src="/files/xQ2iYICZqoq4RcsTryBJ" alt=""><figcaption></figcaption></figure>
+
+The remote action is now available for API calls.
+
+## Copying a remote action ID
+
+To trigger a remote action via API, you must know its ID.
+
+1. Select **Remote Actions** from the main menu.
+2. Click the **Manage remote actions** button at the bottom of the navigation panel.
+3. Find the remote action you need the ID for and click on the action menu on the right side of the row to **Copy NQL ID**.4. Save the NQL ID for late use.
+
+![Copy NQL ID](/files/sjrfqOTGrghvc9YagEX2)
+
+Extract the remote action ID by querying it from the API.
+
+
+# Remote actions API
+
+Trigger and query remote actions using the Nexthink API.
+
+## Trigger a remote action
+
+> Triggers the execution of a remote action for a set of devices.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"tags":[{"name":"Remote actions"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"ExecutionRequest":{"required":["devices","remoteActionId"],"type":"object","properties":{"remoteActionId":{"minLength":1,"type":"string","description":"The ID of the remote action to execute"},"params":{"type":"object","additionalProperties":{"type":"string"},"description":"Any parameters to send to the script. Leave the object empty if there are none. Example: {StartType: \"Automatic\", StatusChange: \"On\", SetStartTypeTo: \"Manual\"}"},"devices":{"maxItems":10000,"minItems":1,"type":"array","description":"Nexthink Collector IDs of the devices that the remote action should be executed on","items":{"type":"string"}},"expiresInMinutes":{"maximum":10080,"minimum":60,"type":"integer","description":"The amount of time in minutes before the execution will expire if a targeted device does not come online to process it.","format":"int32"},"triggerInfo":{"$ref":"#/components/schemas/TriggerInfoRequest"}}},"TriggerInfoRequest":{"type":"object","properties":{"externalSource":{"type":"string","description":"The external application/tool name from where the action was triggered"},"reason":{"maxLength":500,"type":"string","description":"The reason behind triggering the action "},"externalReference":{"type":"string","description":"The external ticket reference ID for which this action was taken"}}},"ExecutionResponse":{"required":["requestId"],"type":"object","properties":{"requestId":{"minLength":1,"type":"string","description":"The Nexthink ID of the request created that spawned the executions. Use this ID to query remote action executions in NQL."},"expiresInMinutes":{"maximum":10080,"minimum":1,"type":"integer","description":"The amount of time in minutes before the execution will expire if a targeted device does not come online to process it.","format":"int32"}}},"ErrorResponse":{"required":["code","message"],"type":"object","properties":{"code":{"minLength":1,"type":"string","description":"error code"},"message":{"minLength":1,"type":"string","description":"error message"}}}}},"paths":{"/api/v1/act/execute":{"post":{"tags":["Remote actions"],"summary":"Trigger a remote action","description":"Triggers the execution of a remote action for a set of devices.","operationId":"executeRA","parameters":[{"name":"Authorization","in":"header","schema":{"type":"string","nullable":true}}],"requestBody":{"description":"The configuration of the execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ExecutionRequest"}}},"required":true},"responses":{"200":{"description":"OK - Successful execution.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ExecutionResponse"}}}},"400":{"description":"Bad request - Invalid request, see the error code for details.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"Unauthorized - No valid authentication credentials.\n"},"403":{"description":"No permission - Not authorized to execute the remote action.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+## List remote actions
+
+> Retrieves the remote actions, including their configuration information.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"tags":[{"name":"Remote actions"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"RemoteAction":{"required":["builtInContentVersion","description","id","name","origin","purpose","scriptInfo","targeting","uuid"],"type":"object","properties":{"id":{"type":"string"},"uuid":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"origin":{"type":"string"},"builtInContentVersion":{"type":"string"},"purpose":{"type":"array","items":{"$ref":"#/components/schemas/Purpose"}},"targeting":{"$ref":"#/components/schemas/Targeting"},"scriptInfo":{"$ref":"#/components/schemas/ScriptInfo"}}},"Purpose":{"type":"string","enum":["DATA_COLLECTION","REMEDIATION"]},"Targeting":{"required":["apiEnabled","manualAllowMultipleDevices","manualEnabled","workflowEnabled"],"type":"object","properties":{"apiEnabled":{"type":"boolean"},"manualEnabled":{"type":"boolean"},"workflowEnabled":{"type":"boolean"},"manualAllowMultipleDevices":{"type":"boolean"}}},"ScriptInfo":{"required":["executionServiceDelegate","hasScriptMacOs","hasScriptWindows","inputs","outputs","runAs","timeoutSeconds"],"type":"object","properties":{"executionServiceDelegate":{"type":"string"},"runAs":{"$ref":"#/components/schemas/RunAsOption"},"timeoutSeconds":{"type":"integer","format":"int32"},"hasScriptWindows":{"type":"boolean"},"hasScriptMacOs":{"type":"boolean"},"inputs":{"type":"array","items":{"$ref":"#/components/schemas/Input"}},"outputs":{"type":"array","items":{"$ref":"#/components/schemas/Output"}}}},"RunAsOption":{"type":"string","enum":["LOCAL_SYSTEM","INTERACTIVE_USER","DELEGATE_TO_SERVICE"]},"Input":{"required":["allowCustomValue","description","id","name","options","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"},"options":{"type":"array","items":{"type":"string"}},"allowCustomValue":{"type":"boolean"}}},"Output":{"required":["description","id","name","type","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"type":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"}}},"ErrorResponse":{"required":["code","message"],"type":"object","properties":{"code":{"minLength":1,"type":"string","description":"error code"},"message":{"minLength":1,"type":"string","description":"error message"}}}}},"paths":{"/api/v1/act/remote-action":{"get":{"tags":["Remote actions"],"summary":"List remote actions","description":"Retrieves the remote actions, including their configuration information.","operationId":"getAllRemoteActions","parameters":[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK - Successful listing.","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/RemoteAction"}}}}},"400":{"description":"Bad request - Invalid request, see the error code for details."},"401":{"description":"Unauthorized - No valid authentication credentials."},"403":{"description":"No permission - Not authorized to get remote action information.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+## Get remote action details
+
+> Retrieve the configuration of a specific remote action.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"tags":[{"name":"Remote actions"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"bearerAuth":[]}],"components":{"securitySchemes":{"bearerAuth":{"type":"http","scheme":"bearer","bearerFormat":"JWT"}},"schemas":{"RemoteAction":{"required":["builtInContentVersion","description","id","name","origin","purpose","scriptInfo","targeting","uuid"],"type":"object","properties":{"id":{"type":"string"},"uuid":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"origin":{"type":"string"},"builtInContentVersion":{"type":"string"},"purpose":{"type":"array","items":{"$ref":"#/components/schemas/Purpose"}},"targeting":{"$ref":"#/components/schemas/Targeting"},"scriptInfo":{"$ref":"#/components/schemas/ScriptInfo"}}},"Purpose":{"type":"string","enum":["DATA_COLLECTION","REMEDIATION"]},"Targeting":{"required":["apiEnabled","manualAllowMultipleDevices","manualEnabled","workflowEnabled"],"type":"object","properties":{"apiEnabled":{"type":"boolean"},"manualEnabled":{"type":"boolean"},"workflowEnabled":{"type":"boolean"},"manualAllowMultipleDevices":{"type":"boolean"}}},"ScriptInfo":{"required":["executionServiceDelegate","hasScriptMacOs","hasScriptWindows","inputs","outputs","runAs","timeoutSeconds"],"type":"object","properties":{"executionServiceDelegate":{"type":"string"},"runAs":{"$ref":"#/components/schemas/RunAsOption"},"timeoutSeconds":{"type":"integer","format":"int32"},"hasScriptWindows":{"type":"boolean"},"hasScriptMacOs":{"type":"boolean"},"inputs":{"type":"array","items":{"$ref":"#/components/schemas/Input"}},"outputs":{"type":"array","items":{"$ref":"#/components/schemas/Output"}}}},"RunAsOption":{"type":"string","enum":["LOCAL_SYSTEM","INTERACTIVE_USER","DELEGATE_TO_SERVICE"]},"Input":{"required":["allowCustomValue","description","id","name","options","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"},"options":{"type":"array","items":{"type":"string"}},"allowCustomValue":{"type":"boolean"}}},"Output":{"required":["description","id","name","type","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"type":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"}}},"ErrorResponse":{"required":["code","message"],"type":"object","properties":{"code":{"minLength":1,"type":"string","description":"error code"},"message":{"minLength":1,"type":"string","description":"error message"}}}}},"paths":{"/api/v1/act/remote-action/details":{"get":{"tags":["Remote actions"],"summary":"Get remote action details","description":"Retrieve the configuration of a specific remote action.","operationId":"getRemoteActionByNqlId","parameters":[{"name":"nql-id","in":"query","description":"The nql-id of the remote action","required":true,"schema":{"type":"string"}},{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}}],"responses":{"200":{"description":"OK - Remote action configuration retrieved.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/RemoteAction"}}}},"401":{"description":"Unauthorized - no valid authentication credentials."},"403":{"description":"No permission - Not authorized to get that information.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"Not found - No remote action associated with that NQL ID.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+
+# Models
+
+## The ErrorResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"ErrorResponse":{"required":["code","message"],"type":"object","properties":{"code":{"minLength":1,"type":"string","description":"error code"},"message":{"minLength":1,"type":"string","description":"error message"}}}}}}
+```
+
+## The ExecutionRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"ExecutionRequest":{"required":["devices","remoteActionId"],"type":"object","properties":{"remoteActionId":{"minLength":1,"type":"string","description":"The ID of the remote action to execute"},"params":{"type":"object","additionalProperties":{"type":"string"},"description":"Any parameters to send to the script. Leave the object empty if there are none. Example: {StartType: \"Automatic\", StatusChange: \"On\", SetStartTypeTo: \"Manual\"}"},"devices":{"maxItems":10000,"minItems":1,"type":"array","description":"Nexthink Collector IDs of the devices that the remote action should be executed on","items":{"type":"string"}},"expiresInMinutes":{"maximum":10080,"minimum":60,"type":"integer","description":"The amount of time in minutes before the execution will expire if a targeted device does not come online to process it.","format":"int32"},"triggerInfo":{"$ref":"#/components/schemas/TriggerInfoRequest"}}},"TriggerInfoRequest":{"type":"object","properties":{"externalSource":{"type":"string","description":"The external application/tool name from where the action was triggered"},"reason":{"maxLength":500,"type":"string","description":"The reason behind triggering the action "},"externalReference":{"type":"string","description":"The external ticket reference ID for which this action was taken"}}}}}}
+```
+
+## The ExecutionResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"ExecutionResponse":{"required":["requestId"],"type":"object","properties":{"requestId":{"minLength":1,"type":"string","description":"The Nexthink ID of the request created that spawned the executions. Use this ID to query remote action executions in NQL."},"expiresInMinutes":{"maximum":10080,"minimum":1,"type":"integer","description":"The amount of time in minutes before the execution will expire if a targeted device does not come online to process it.","format":"int32"}}}}}}
+```
+
+## The Input object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"Input":{"required":["allowCustomValue","description","id","name","options","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"},"options":{"type":"array","items":{"type":"string"}},"allowCustomValue":{"type":"boolean"}}}}}}
+```
+
+## The Output object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"Output":{"required":["description","id","name","type","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"type":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"}}}}}}
+```
+
+## The Purpose object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"Purpose":{"type":"string","enum":["DATA_COLLECTION","REMEDIATION"]}}}}
+```
+
+## The RemoteAction object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"RemoteAction":{"required":["builtInContentVersion","description","id","name","origin","purpose","scriptInfo","targeting","uuid"],"type":"object","properties":{"id":{"type":"string"},"uuid":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"origin":{"type":"string"},"builtInContentVersion":{"type":"string"},"purpose":{"type":"array","items":{"$ref":"#/components/schemas/Purpose"}},"targeting":{"$ref":"#/components/schemas/Targeting"},"scriptInfo":{"$ref":"#/components/schemas/ScriptInfo"}}},"Purpose":{"type":"string","enum":["DATA_COLLECTION","REMEDIATION"]},"Targeting":{"required":["apiEnabled","manualAllowMultipleDevices","manualEnabled","workflowEnabled"],"type":"object","properties":{"apiEnabled":{"type":"boolean"},"manualEnabled":{"type":"boolean"},"workflowEnabled":{"type":"boolean"},"manualAllowMultipleDevices":{"type":"boolean"}}},"ScriptInfo":{"required":["executionServiceDelegate","hasScriptMacOs","hasScriptWindows","inputs","outputs","runAs","timeoutSeconds"],"type":"object","properties":{"executionServiceDelegate":{"type":"string"},"runAs":{"$ref":"#/components/schemas/RunAsOption"},"timeoutSeconds":{"type":"integer","format":"int32"},"hasScriptWindows":{"type":"boolean"},"hasScriptMacOs":{"type":"boolean"},"inputs":{"type":"array","items":{"$ref":"#/components/schemas/Input"}},"outputs":{"type":"array","items":{"$ref":"#/components/schemas/Output"}}}},"RunAsOption":{"type":"string","enum":["LOCAL_SYSTEM","INTERACTIVE_USER","DELEGATE_TO_SERVICE"]},"Input":{"required":["allowCustomValue","description","id","name","options","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"},"options":{"type":"array","items":{"type":"string"}},"allowCustomValue":{"type":"boolean"}}},"Output":{"required":["description","id","name","type","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"type":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"}}}}}}
+```
+
+## The RunAsOption object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"RunAsOption":{"type":"string","enum":["LOCAL_SYSTEM","INTERACTIVE_USER","DELEGATE_TO_SERVICE"]}}}}
+```
+
+## The ScriptInfo object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"ScriptInfo":{"required":["executionServiceDelegate","hasScriptMacOs","hasScriptWindows","inputs","outputs","runAs","timeoutSeconds"],"type":"object","properties":{"executionServiceDelegate":{"type":"string"},"runAs":{"$ref":"#/components/schemas/RunAsOption"},"timeoutSeconds":{"type":"integer","format":"int32"},"hasScriptWindows":{"type":"boolean"},"hasScriptMacOs":{"type":"boolean"},"inputs":{"type":"array","items":{"$ref":"#/components/schemas/Input"}},"outputs":{"type":"array","items":{"$ref":"#/components/schemas/Output"}}}},"RunAsOption":{"type":"string","enum":["LOCAL_SYSTEM","INTERACTIVE_USER","DELEGATE_TO_SERVICE"]},"Input":{"required":["allowCustomValue","description","id","name","options","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"},"options":{"type":"array","items":{"type":"string"}},"allowCustomValue":{"type":"boolean"}}},"Output":{"required":["description","id","name","type","usedByMacOs","usedByWindows"],"type":"object","properties":{"id":{"type":"string"},"name":{"type":"string"},"type":{"type":"string"},"description":{"type":"string"},"usedByWindows":{"type":"boolean"},"usedByMacOs":{"type":"boolean"}}}}}}
+```
+
+## The Targeting object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"Targeting":{"required":["apiEnabled","manualAllowMultipleDevices","manualEnabled","workflowEnabled"],"type":"object","properties":{"apiEnabled":{"type":"boolean"},"manualEnabled":{"type":"boolean"},"workflowEnabled":{"type":"boolean"},"manualAllowMultipleDevices":{"type":"boolean"}}}}}}
+```
+
+## The TriggerInfoRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Remote Actions API","version":"1.0.0"},"components":{"schemas":{"TriggerInfoRequest":{"type":"object","properties":{"externalSource":{"type":"string","description":"The external application/tool name from where the action was triggered"},"reason":{"maxLength":500,"type":"string","description":"The reason behind triggering the action "},"externalReference":{"type":"string","description":"The external ticket reference ID for which this action was taken"}}}}}}
+```
+
+
+# Spark
+
+## Spark API overview
+
+Meet employees where they are. Spark provides a standard handover mechanism that allows third-party chatbots to transfer a live conversation to Spark without losing context. The process consists of the following steps:
+
+1. Employees initiate an IT request through a familiar enterprise chatbot interface.
+2. The chatbot forwards the user message to Spark using the Handoff API.
+3. Spark responds in Microsoft Teams and notifies the employee.
+4. The employee continues the resolution in Microsoft Teams by interacting with Spark.
+
+This ensures a seamless employee experience and minimizes development effort.
+
+## Setting up API credentials
+
+To set up an integration with the Nexthink API, you must first create a set of API credentials in your instance that the external application or service uses to access the Spark API. Refer to the [API Credentials](/api) documentation.
+
+## Configuring Spark for API
+
+The Spark redirection API does not require any configuration within the Nexthink platform. Redirection is currently handled automatically through the Spark MS Teams application.
+
+Refer to [Handoff API](/api/spark/handoff-api) for more details about request structure, authentication requirements, and supported parameters.
+
+
+# Handoff API
+
+## Hand off a conversation to Spark
+
+> Handles user message requests for which responses will be redirected to Spark MS Teams.<br>
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"tags":[],"paths":{"/api/v1/spark/handoff":{"post":{"tags":["Handoff API"],"summary":"Hand off a conversation to Spark","description":"Handles user message requests for which responses will be redirected to Spark MS Teams.\n","operationId":"handleHandoffRequest","parameters":[{"name":"Authorization","in":"header","description":"Authorization part for this request","required":true,"schema":{"type":"string"}},{"name":"Timezone","in":"header","description":"Timezone to be used for this request","required":false,"schema":{"type":"string"}},{"name":"User-Principal-Name","in":"header","description":"UPN to be used for this request","required":true,"schema":{"type":"string"}}],"requestBody":{"description":"Handoff conversation request containing user message","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HandoffConversationMessageRequest"}}},"required":true},"responses":{"204":{"description":"Request successful"},"400":{"description":"Bad request"},"401":{"description":"Unauthorized"},"403":{"description":"Forbidden","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"404":{"description":"Not found","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"500":{"description":"Internal server error"},"502":{"description":"Bad gateway"},"503":{"description":"Service unavailable"}}}}},"components":{"schemas":{"HandoffConversationMessageRequest":{"required":["message"],"type":"object","properties":{"metadata":{"type":"object","additionalProperties":{"type":"string"},"nullable":true,"description":"Optional metadata that will be passed through the request flow"},"message":{"$ref":"#/components/schemas/MessageDTO"}}},"MessageDTO":{"required":["parts"],"type":"object","properties":{"parts":{"minItems":1,"type":"array","items":{"$ref":"#/components/schemas/PartDTO"}}}},"PartDTO":{"type":"object","required":["type"],"properties":{"type":{"$ref":"#/components/schemas/PartType"}},"discriminator":{"propertyName":"type","mapping":{"TEXT":"#/components/schemas/TextPartDTO","FILE":"#/components/schemas/FilePartByContent"}},"oneOf":[{"$ref":"#/components/schemas/TextPartDTO"},{"$ref":"#/components/schemas/FilePartByContent"}]},"PartType":{"type":"string","enum":["TEXT","FILE"]},"TextPartDTO":{"required":["text"],"type":"object","properties":{"text":{"minLength":1,"type":"string"}}},"FilePartByContent":{"required":["mimeType","fileContent"],"type":"object","properties":{"fileContent":{"type":"string"},"mimeType":{"minLength":1,"type":"string"}}},"ErrorResponse":{"type":"object","properties":{"message":{"type":"string"}}}}}}
+```
+
+
+# Models
+
+## The ErrorResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"components":{"schemas":{"ErrorResponse":{"type":"object","properties":{"message":{"type":"string"}}}}}}
+```
+
+## The FilePartByContent object
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"components":{"schemas":{"FilePartByContent":{"required":["mimeType","fileContent"],"type":"object","properties":{"fileContent":{"type":"string"},"mimeType":{"minLength":1,"type":"string"}}}}}}
+```
+
+## The MessageDTO object
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"components":{"schemas":{"MessageDTO":{"required":["parts"],"type":"object","properties":{"parts":{"minItems":1,"type":"array","items":{"$ref":"#/components/schemas/PartDTO"}}}},"PartDTO":{"type":"object","required":["type"],"properties":{"type":{"$ref":"#/components/schemas/PartType"}},"discriminator":{"propertyName":"type","mapping":{"TEXT":"#/components/schemas/TextPartDTO","FILE":"#/components/schemas/FilePartByContent"}},"oneOf":[{"$ref":"#/components/schemas/TextPartDTO"},{"$ref":"#/components/schemas/FilePartByContent"}]},"PartType":{"type":"string","enum":["TEXT","FILE"]},"TextPartDTO":{"required":["text"],"type":"object","properties":{"text":{"minLength":1,"type":"string"}}},"FilePartByContent":{"required":["mimeType","fileContent"],"type":"object","properties":{"fileContent":{"type":"string"},"mimeType":{"minLength":1,"type":"string"}}}}}}
+```
+
+## The PartDTO object
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"components":{"schemas":{"PartDTO":{"type":"object","required":["type"],"properties":{"type":{"$ref":"#/components/schemas/PartType"}},"discriminator":{"propertyName":"type","mapping":{"TEXT":"#/components/schemas/TextPartDTO","FILE":"#/components/schemas/FilePartByContent"}},"oneOf":[{"$ref":"#/components/schemas/TextPartDTO"},{"$ref":"#/components/schemas/FilePartByContent"}]},"PartType":{"type":"string","enum":["TEXT","FILE"]},"TextPartDTO":{"required":["text"],"type":"object","properties":{"text":{"minLength":1,"type":"string"}}},"FilePartByContent":{"required":["mimeType","fileContent"],"type":"object","properties":{"fileContent":{"type":"string"},"mimeType":{"minLength":1,"type":"string"}}}}}}
+```
+
+## The PartType object
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"components":{"schemas":{"PartType":{"type":"string","enum":["TEXT","FILE"]}}}}
+```
+
+## The HandoffConversationMessageRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"components":{"schemas":{"HandoffConversationMessageRequest":{"required":["message"],"type":"object","properties":{"metadata":{"type":"object","additionalProperties":{"type":"string"},"nullable":true,"description":"Optional metadata that will be passed through the request flow"},"message":{"$ref":"#/components/schemas/MessageDTO"}}},"MessageDTO":{"required":["parts"],"type":"object","properties":{"parts":{"minItems":1,"type":"array","items":{"$ref":"#/components/schemas/PartDTO"}}}},"PartDTO":{"type":"object","required":["type"],"properties":{"type":{"$ref":"#/components/schemas/PartType"}},"discriminator":{"propertyName":"type","mapping":{"TEXT":"#/components/schemas/TextPartDTO","FILE":"#/components/schemas/FilePartByContent"}},"oneOf":[{"$ref":"#/components/schemas/TextPartDTO"},{"$ref":"#/components/schemas/FilePartByContent"}]},"PartType":{"type":"string","enum":["TEXT","FILE"]},"TextPartDTO":{"required":["text"],"type":"object","properties":{"text":{"minLength":1,"type":"string"}}},"FilePartByContent":{"required":["mimeType","fileContent"],"type":"object","properties":{"fileContent":{"type":"string"},"mimeType":{"minLength":1,"type":"string"}}}}}}
+```
+
+## The TextPartDTO object
+
+```json
+{"openapi":"3.0.1","info":{"title":"public-api","version":"1.0.0"},"components":{"schemas":{"TextPartDTO":{"required":["text"],"type":"object","properties":{"text":{"minLength":1,"type":"string"}}}}}}
+```
+
+
+# Workflows
+
+Trigger and query workflows using the Nexthink API, giving you the flexibility to create and visualize metrics using third-party software.
+
+## Setting up API credentials
+
+To set up an integration with the Nexthink API, you must first create a set of API credentials in your instance that the external application or service uses to access the Workflows API. Refer to the [API Credentials](/api) documentation.
+
+## Configuring workflows for API
+
+To configure workflows via API:
+
+1. Select **Workflows** from the main menu.
+2. Create a **New** workflow or edit an existing one as described in the [Manage Workflows](https://docs.nexthink.com/platform/latest/manage-workflows) documentation.
+3. Under the **General** tab, select the **API** checkbox.
+4. Click the **Save workflow** button. The workflow is now available for API calls.
+
+![image.png](/files/5UrXXobQKhyiwcq45zfh)
+
+Alternatively, configure workflows by editing an existing one through the the Manage workflows page:
+
+* Select **Manage workflows**.
+* Select the relevant workflow and then click on the action menu on the right side of the row to **Edit**.
+
+## Copying workflow NQL ID
+
+1. Select **Workflows** > **Manage workflows** in the navigation panel.
+2. Select the relevant workflow and then click on the action menu on the right side of the row to **Copy NQL ID**.
+3. Save the workflow NQL ID for later use.
+
+![ManageWorflow](/files/yxaU6NC4az2hn1CgDjpZ)
+
+Extract the workflow NQL ID by querying it from the API.
+
+
+# Trigger a workflow
+
+Trigger and query workflows using the Nexthink API.
+
+## Trigger a workflow V1
+
+> Triggers the execution of a workflow.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"tags":[{"name":"Workflows"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"publicApiAuth":[]}],"components":{"securitySchemes":{"publicApiAuth":{"type":"oauth2","flows":{"clientCredentials":{"tokenUrl":"https://instance-login.region.nexthink.cloud/oauth2/default/v1/token","scopes":{}}}}},"schemas":{"ExecutionRequest":{"required":["workflowId","users","devices"],"type":"object","properties":{"workflowId":{"type":"string","description":"The ID of the workflow to execute."},"devices":{"maxItems":10000,"type":"array","description":"Nexthink Collector IDs of the devices that the workflow should be executed on. **Note**: If `devices` are included in the request, then `users` are optional by default.\n","items":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"}},"users":{"maxItems":10000,"type":"array","description":"The security IDs of the users that the workflow would target. **Note**: If `users` are included in the request, then `devices` are optional by default.\n","items":{"pattern":"^S(-\\d+){2,10}$|^0$","type":"string"}},"params":{"allOf":[{"type":"object","additionalProperties":{"type":"string"}},{"description":"Any parameters that can be sent to the workflow. If your workflow has been configured with a parameter, then `params` is optional. \nLeave the object empty if there are no parameters.\n"}]}}},"ExecutionResponse":{"required":["executionsUuids","requestUuid"],"type":"object","properties":{"requestUuid":{"minLength":1,"type":"string","description":"The request ID. Use this ID to query workflow executions in NQL `workflow.executions.request_id`."},"executionsUuids":{"minItems":1,"type":"array","description":"A list of execution ID for each object targeted `workflow.executions.execution_id`.","items":{"type":"string"}}},"description":"Each request spawns one or more executions depending on the input. All executions will have the same request ID and a unique execution ID."},"ErrorResponse":{"required":["code","details"],"type":"object","properties":{"code":{"minLength":1,"type":"string"},"details":{"type":"string"}}}}},"paths":{"/api/v1/workflows/execute":{"post":{"tags":["Workflows"],"summary":"Trigger a workflow V1","description":"Triggers the execution of a workflow.","operationId":"executeEA","parameters":[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}},{"name":"Source","in":"header","schema":{"type":"string","nullable":true}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ExecutionRequest"}}},"required":true},"responses":{"200":{"description":"Successful execution response.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ExecutionResponse"}}}},"400":{"description":"Bad request - invalid request, see error code for details.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"Unauthorized - no valid authentication credentials."},"403":{"description":"No permission - no permission to execute workflow.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+## Trigger a workflow V2
+
+> Triggers the execution of a workflow using external identifiers for \`users\` and \`devices\`.\
+> For \`users\`, provide at least one of the following:\
+> \- \`sid\`: The security identifier of the user\
+> \- \`upn\`: The user's principal name (email format)\
+> \- \`uid\`: A globally unique user identifier\
+> For \`devices\`, provide at least one of the following:\
+> \- \`collectorUid\`: The Collector UUID of the device\
+> \- \`name\`: The name of the device\
+> \- \`uid\`: A globally unique device identifier\
+> If multiple users or devices match the identifiers, the system triggers the workflow on the most recently active one (\`lastSeen\`).<br>
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"tags":[{"name":"Workflows"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"publicApiAuth":[]}],"components":{"securitySchemes":{"publicApiAuth":{"type":"oauth2","flows":{"clientCredentials":{"tokenUrl":"https://instance-login.region.nexthink.cloud/oauth2/default/v1/token","scopes":{}}}}},"schemas":{"ExternalIdsExecutionRequest":{"required":["workflowId","users","devices"],"type":"object","properties":{"workflowId":{"type":"string","description":"The ID of the workflow to execute."},"devices":{"maxItems":10000,"type":"array","description":"Nexthink Collector IDs, device names and/or device UIDs of the devices that the workflow should be executed on.","items":{"$ref":"#/components/schemas/DeviceData"}},"users":{"maxItems":10000,"type":"array","description":"User's Security IDs, user's principal name and/or users UIDs that the workflow would target.","items":{"$ref":"#/components/schemas/UserData"}},"params":{"allOf":[{"type":"object","additionalProperties":{"type":"string"}},{"description":"Any parameters to send to the workflow. Leave the object empty if there are none."}]}}},"DeviceData":{"type":"object","properties":{"name":{"type":"string"},"uid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"},"collectorUid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"}}},"UserData":{"type":"object","properties":{"uid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"},"upn":{"pattern":"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$","type":"string"},"sid":{"pattern":"^S(-\\d+){2,10}$|^0$","type":"string"}}},"ExecutionResponse":{"required":["executionsUuids","requestUuid"],"type":"object","properties":{"requestUuid":{"minLength":1,"type":"string","description":"The request ID. Use this ID to query workflow executions in NQL `workflow.executions.request_id`."},"executionsUuids":{"minItems":1,"type":"array","description":"A list of execution ID for each object targeted `workflow.executions.execution_id`.","items":{"type":"string"}}},"description":"Each request spawns one or more executions depending on the input. All executions will have the same request ID and a unique execution ID."},"ErrorResponse":{"required":["code","details"],"type":"object","properties":{"code":{"minLength":1,"type":"string"},"details":{"type":"string"}}}}},"paths":{"/api/v2/workflows/execute":{"post":{"tags":["Workflows"],"summary":"Trigger a workflow V2","description":"Triggers the execution of a workflow using external identifiers for `users` and `devices`.\nFor `users`, provide at least one of the following:\n- `sid`: The security identifier of the user\n- `upn`: The user's principal name (email format)\n- `uid`: A globally unique user identifier\nFor `devices`, provide at least one of the following:\n- `collectorUid`: The Collector UUID of the device\n- `name`: The name of the device\n- `uid`: A globally unique device identifier\nIf multiple users or devices match the identifiers, the system triggers the workflow on the most recently active one (`lastSeen`).\n","operationId":"executeEAWithExternalIds","parameters":[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"}},{"name":"Source","in":"header","schema":{"type":"string","nullable":true}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ExternalIdsExecutionRequest"}}},"required":true},"responses":{"200":{"description":"Successful execution response.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ExecutionResponse"}}}},"400":{"description":"Bad request - invalid request, see error code for details.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"Unauthorized - no valid authentication credentials."},"403":{"description":"No permission - no permission to execute workflow.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+## Trigger wait for event
+
+> Triggers a waiting workflow execution.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"tags":[{"name":"Workflows"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"publicApiAuth":[]}],"components":{"securitySchemes":{"publicApiAuth":{"type":"oauth2","flows":{"clientCredentials":{"tokenUrl":"https://instance-login.region.nexthink.cloud/oauth2/default/v1/token","scopes":{}}}}},"schemas":{"ThinkletTriggerRequest":{"type":"object","properties":{"parameters":{"allOf":[{"type":"object","additionalProperties":{"minLength":1,"type":"string"}},{"description":"Any parameters to send to the thinklet waiting for this trigger. Leave the object empty if there are none."}]}}},"ThinkletTriggerResponse":{"required":["requestUuid"],"type":"object","properties":{"requestUuid":{"type":"string","description":"The request ID.","format":"uuid"}}},"ErrorResponse":{"required":["code","details"],"type":"object","properties":{"code":{"minLength":1,"type":"string"},"details":{"type":"string"}}}}},"paths":{"/api/v1/workflows/workflows/{workflowUuid}/execution/{executionUuid}/trigger":{"post":{"tags":["Workflows"],"summary":"Trigger wait for event","description":"Triggers a waiting workflow execution.","operationId":"triggerThinklet","parameters":[{"name":"Source","in":"header","schema":{"type":"string","nullable":true}},{"name":"workflowUuid","in":"path","required":true,"schema":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"}},{"name":"executionUuid","in":"path","required":true,"schema":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"}}],"requestBody":{"content":{"application/json":{"schema":{"$ref":"#/components/schemas/ThinkletTriggerRequest"}}},"required":true},"responses":{"200":{"description":"Returns a request identifier.","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/ThinkletTriggerResponse"}}}}},"400":{"description":"Bad request - invalid request, see error code for details.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"Unauthorized - no valid authentication credentials."},"403":{"description":"No permission - not authorized to execute workflow.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+## List workflows
+
+> Returns a list of workflows, including their configuration information. Use query parameters to filter the list of the workflows.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"tags":[{"name":"Workflows"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"publicApiAuth":[]}],"components":{"securitySchemes":{"publicApiAuth":{"type":"oauth2","flows":{"clientCredentials":{"tokenUrl":"https://instance-login.region.nexthink.cloud/oauth2/default/v1/token","scopes":{}}}}},"schemas":{"WorkflowFilter.WorkflowDependency":{"type":"string","enum":["USER","DEVICE","USER_AND_DEVICE","NONE"]},"WorkflowFilter.TriggerMethod":{"type":"string","enum":["API","MANUAL","MANUAL_MULTIPLE","SCHEDULER"]},"Workflow":{"required":["description","id","lastUpdateTime","name","status","triggerMethods","uuid","versions"],"type":"object","properties":{"id":{"type":"string"},"uuid":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"status":{"$ref":"#/components/schemas/Workflow.Status"},"lastUpdateTime":{"type":"string","format":"date-time"},"triggerMethods":{"$ref":"#/components/schemas/Workflow"},"versions":{"type":"array","items":{"$ref":"#/components/schemas/Workflow"}}}},"Workflow.Status":{"type":"string","enum":["ACTIVE","INACTIVE"]},"ErrorResponse":{"required":["code","details"],"type":"object","properties":{"code":{"minLength":1,"type":"string"},"details":{"type":"string"}}}}},"paths":{"/api/v1/workflows":{"get":{"tags":["Workflows"],"summary":"List workflows","description":"Returns a list of workflows, including their configuration information. Use query parameters to filter the list of the workflows.","operationId":"getAllWorkflows","parameters":[{"name":"dependency","in":"query","required":true,"schema":{"$ref":"#/components/schemas/WorkflowFilter.WorkflowDependency"}},{"name":"triggerMethod","in":"query","required":true,"schema":{"$ref":"#/components/schemas/WorkflowFilter.TriggerMethod"}},{"name":"fetchOnlyActiveWorkflows","in":"query","required":false,"schema":{"type":"boolean"}},{"name":"Source","in":"header","schema":{"type":"string","nullable":true}}],"responses":{"200":{"description":"List of workflows and their configurations.","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Workflow"}}}}},"400":{"description":"Bad request - invalid request, see error code for details.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"Unauthorized - no valid authentication credentials."},"403":{"description":"No permission - not authorized to execute workflow.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+## Get workflow
+
+> Returns the configuration of a specific workflow by NQL ID. Use \`nqlId\` to filter for a specific configured workflow.
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"tags":[{"name":"Workflows"}],"servers":[{"url":"https://instance.api.region.nexthink.cloud"}],"security":[{"publicApiAuth":[]}],"components":{"securitySchemes":{"publicApiAuth":{"type":"oauth2","flows":{"clientCredentials":{"tokenUrl":"https://instance-login.region.nexthink.cloud/oauth2/default/v1/token","scopes":{}}}}},"schemas":{"Workflow":{"required":["description","id","lastUpdateTime","name","status","triggerMethods","uuid","versions"],"type":"object","properties":{"id":{"type":"string"},"uuid":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"status":{"$ref":"#/components/schemas/Workflow.Status"},"lastUpdateTime":{"type":"string","format":"date-time"},"triggerMethods":{"$ref":"#/components/schemas/Workflow"},"versions":{"type":"array","items":{"$ref":"#/components/schemas/Workflow"}}}},"Workflow.Status":{"type":"string","enum":["ACTIVE","INACTIVE"]},"ErrorResponse":{"required":["code","details"],"type":"object","properties":{"code":{"minLength":1,"type":"string"},"details":{"type":"string"}}}}},"paths":{"/api/v1/workflows/details":{"get":{"tags":["Workflows"],"summary":"Get workflow","description":"Returns the configuration of a specific workflow by NQL ID. Use `nqlId` to filter for a specific configured workflow.","operationId":"getWorkflow","parameters":[{"name":"nqlId","in":"query","description":"The NQL ID of the workflow.","required":true,"schema":{"type":"string"}},{"name":"Source","in":"header","schema":{"type":"string","nullable":true}}],"responses":{"200":{"description":"Workflow configuration.","content":{"application/json":{"schema":{"type":"array","items":{"$ref":"#/components/schemas/Workflow"}}}}},"400":{"description":"Bad request - invalid request, see error code for details.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"401":{"description":"Unauthorized - no valid authentication credentials."},"403":{"description":"No permission - no permission to execute workflow.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}}}}}}}
+```
+
+
+# Models
+
+## The DeviceData object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"DeviceData":{"type":"object","properties":{"name":{"type":"string"},"uid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"},"collectorUid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"}}}}}}
+```
+
+## The ErrorResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"ErrorResponse":{"required":["code","details"],"type":"object","properties":{"code":{"minLength":1,"type":"string"},"details":{"type":"string"}}}}}}
+```
+
+## The ExecutionRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"ExecutionRequest":{"required":["workflowId","users","devices"],"type":"object","properties":{"workflowId":{"type":"string","description":"The ID of the workflow to execute."},"devices":{"maxItems":10000,"type":"array","description":"Nexthink Collector IDs of the devices that the workflow should be executed on. **Note**: If `devices` are included in the request, then `users` are optional by default.\n","items":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"}},"users":{"maxItems":10000,"type":"array","description":"The security IDs of the users that the workflow would target. **Note**: If `users` are included in the request, then `devices` are optional by default.\n","items":{"pattern":"^S(-\\d+){2,10}$|^0$","type":"string"}},"params":{"allOf":[{"type":"object","additionalProperties":{"type":"string"}},{"description":"Any parameters that can be sent to the workflow. If your workflow has been configured with a parameter, then `params` is optional. \nLeave the object empty if there are no parameters.\n"}]}}}}}}
+```
+
+## The ExecutionResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"ExecutionResponse":{"required":["executionsUuids","requestUuid"],"type":"object","properties":{"requestUuid":{"minLength":1,"type":"string","description":"The request ID. Use this ID to query workflow executions in NQL `workflow.executions.request_id`."},"executionsUuids":{"minItems":1,"type":"array","description":"A list of execution ID for each object targeted `workflow.executions.execution_id`.","items":{"type":"string"}}},"description":"Each request spawns one or more executions depending on the input. All executions will have the same request ID and a unique execution ID."}}}}
+```
+
+## The ExternalIdsExecutionRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"ExternalIdsExecutionRequest":{"required":["workflowId","users","devices"],"type":"object","properties":{"workflowId":{"type":"string","description":"The ID of the workflow to execute."},"devices":{"maxItems":10000,"type":"array","description":"Nexthink Collector IDs, device names and/or device UIDs of the devices that the workflow should be executed on.","items":{"$ref":"#/components/schemas/DeviceData"}},"users":{"maxItems":10000,"type":"array","description":"User's Security IDs, user's principal name and/or users UIDs that the workflow would target.","items":{"$ref":"#/components/schemas/UserData"}},"params":{"allOf":[{"type":"object","additionalProperties":{"type":"string"}},{"description":"Any parameters to send to the workflow. Leave the object empty if there are none."}]}}},"DeviceData":{"type":"object","properties":{"name":{"type":"string"},"uid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"},"collectorUid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"}}},"UserData":{"type":"object","properties":{"uid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"},"upn":{"pattern":"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$","type":"string"},"sid":{"pattern":"^S(-\\d+){2,10}$|^0$","type":"string"}}}}}}
+```
+
+## The ThinkletTriggerRequest object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"ThinkletTriggerRequest":{"type":"object","properties":{"parameters":{"allOf":[{"type":"object","additionalProperties":{"minLength":1,"type":"string"}},{"description":"Any parameters to send to the thinklet waiting for this trigger. Leave the object empty if there are none."}]}}}}}}
+```
+
+## The ThinkletTriggerResponse object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"ThinkletTriggerResponse":{"required":["requestUuid"],"type":"object","properties":{"requestUuid":{"type":"string","description":"The request ID.","format":"uuid"}}}}}}
+```
+
+## The TriggerInfo object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"TriggerInfo":{"type":"object","properties":{"externalReference":{"type":"string","description":"External reference: An identifier of the external web application record in reference to which the workflow was executed."},"internalSource":{"type":"string","description":"Displays the name of the feature from which the workflow was triggered."},"externalSource":{"type":"string","description":"Name of the external system, outside of Nexthink, from where the workflow was triggered."},"reason":{"type":"string","description":"The reason behind triggering the action."},"extra":{"type":"string","description":"Use this field to store any extra information."}}}}}}
+```
+
+## The UserData object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"UserData":{"type":"object","properties":{"uid":{"pattern":"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$","type":"string"},"upn":{"pattern":"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$","type":"string"},"sid":{"pattern":"^S(-\\d+){2,10}$|^0$","type":"string"}}}}}}
+```
+
+## The Workflow object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"Workflow":{"required":["description","id","lastUpdateTime","name","status","triggerMethods","uuid","versions"],"type":"object","properties":{"id":{"type":"string"},"uuid":{"type":"string"},"name":{"type":"string"},"description":{"type":"string"},"status":{"$ref":"#/components/schemas/Workflow.Status"},"lastUpdateTime":{"type":"string","format":"date-time"},"triggerMethods":{"$ref":"#/components/schemas/Workflow"},"versions":{"type":"array","items":{"$ref":"#/components/schemas/Workflow"}}}},"Workflow.Status":{"type":"string","enum":["ACTIVE","INACTIVE"]}}}}
+```
+
+## The Workflow\.Status object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"Workflow.Status":{"type":"string","enum":["ACTIVE","INACTIVE"]}}}}
+```
+
+## The WorkflowFilter.TriggerMethod object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"WorkflowFilter.TriggerMethod":{"type":"string","enum":["API","MANUAL","MANUAL_MULTIPLE","SCHEDULER"]}}}}
+```
+
+## The WorkflowFilter.WorkflowDependency object
+
+```json
+{"openapi":"3.0.1","info":{"title":"Workflows","version":"1.0.0"},"components":{"schemas":{"WorkflowFilter.WorkflowDependency":{"type":"string","enum":["USER","DEVICE","USER_AND_DEVICE","NONE"]}}}}
+```
+
+

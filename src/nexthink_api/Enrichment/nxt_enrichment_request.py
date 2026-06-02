@@ -17,7 +17,9 @@ from pydantic import BaseModel, conlist, Field
 
 from nexthink_api.Enrichment.nxt_enrichment import NxtEnrichment
 
-__all__ = ["NxtEnrichmentRequest"]
+MAX_ENRICHMENTS_PER_REQUEST = 10000
+
+__all__ = ["MAX_ENRICHMENTS_PER_REQUEST", "NxtEnrichmentRequest"]
 
 
 class NxtEnrichmentRequest(BaseModel):
@@ -32,5 +34,5 @@ class NxtEnrichmentRequest(BaseModel):
 
     """
 
-    enrichments: conlist(NxtEnrichment, min_length=1, max_length=5000)
+    enrichments: conlist(NxtEnrichment, min_length=1, max_length=MAX_ENRICHMENTS_PER_REQUEST)
     domain: str = Field(min_length=1)

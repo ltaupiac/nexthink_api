@@ -3,7 +3,7 @@
 # https://developer.nexthink.com/docs/api/nql-api/schemas/nql-api-execute-v2-response
 
 from datetime import datetime
-from typing import List
+from typing import Any, List
 from pydantic import BaseModel, field_validator
 
 __all__ = ["NxtNqlApiExecuteV2Response"]
@@ -22,7 +22,7 @@ class NxtNqlApiExecuteV2Response(BaseModel):
         Number of rows returned
     executionDateTime : str
         Date and time of the execution in ISO 8601 format (YYYY-MM-DDThh:mm:ss.sssTZD).
-    data : List[dict[str, str]]
+    data : List[dict[str, Any]]
         List of dictionaries representing the rows of the query result.
 
     """
@@ -31,7 +31,7 @@ class NxtNqlApiExecuteV2Response(BaseModel):
     executedQuery: str
     rows: int
     executionDateTime: str
-    data: List[dict[str, str]]
+    data: List[dict[str, Any]]
 
     # Avoid pycharm false positive
     # noinspection PyNestedDecorators

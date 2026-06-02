@@ -1,12 +1,10 @@
 """Nexthink Tenant Configuration Class."""
 
 from typing import Final, Self, Optional, Dict, Union
-from urllib.parse import urljoin
 import os
 from pydantic import BaseModel, HttpUrl, Field, model_validator
 
 from nexthink_api.Models.nxt_region_name import NxtRegionName
-from nexthink_api.Models.nxt_endpoint import NxtEndpoint
 
 
 class NxtSettings(BaseModel):
@@ -35,6 +33,8 @@ class NxtSettings(BaseModel):
     """
 
     base_url: Final = 'https://{instance}.api.{region}.nexthink.cloud'
+    login_base_url: Final = 'https://{instance}-login.{region}.nexthink.cloud'
+    token_path: Final = '/oauth2/default/v1/token'
     instance: str = Field(min_length=1)
     region: NxtRegionName
     infinity_base_uri: HttpUrl = Field(init=False, default=None)
@@ -68,7 +68,9 @@ class NxtSettings(BaseModel):
         if instance is None or region is None:
             raise ValueError("Instance and Region are required")
 
-        values['infinity_base_uri'] = cls.base_url.format(instance=instance, region=region.value)
+        region_value = region.value if isinstance(region, NxtRegionName) else region
+        values['infinity_base_uri'] = cls.base_url.format(instance=instance, region=region_value)
+        values['token_url'] = f"{cls.login_base_url.format(instance=instance, region=region_value)}{cls.token_path}"
         return values
 
     @model_validator(mode='after')
@@ -81,7 +83,6 @@ class NxtSettings(BaseModel):
                 the instantiated class
 
         """
-        self.token_url = urljoin(str(self.infinity_base_uri), NxtEndpoint.Token.value)
         # Proxy has not been provided, try to detect proxies
         if self.proxies is None:
             # Attempt to detect proxies from environment variables (optional)

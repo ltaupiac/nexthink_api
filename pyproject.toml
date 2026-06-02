@@ -1,12 +1,12 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools>=82.0.1", "setuptools-scm", "packaging>=24.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "nexthink_api"
 authors = [{name = "Laurent Taupiac", email = "ltaupiac@lfdj.com"}]
-license = {file = "LICENSE"}
-classifiers = ["License :: OSI Approved :: MIT License"]
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 dynamic = ["version"]
 description = "Python package for Nexthink API"
 requires-python = ">=3.10"
@@ -15,12 +15,13 @@ dependencies=[
     "requests==2.31.0",
     "urllib3",
     "pydantic",
-    "pyyaml",
+    "pandas>=2.2.2",
+    "truststore>=0.10.0",
 ]
 readme = "README.md"
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
   "pytest>=8.1.1,<9",
   "ruff>=0.6.2",
   "bump-my-version>=0.26.0",
@@ -31,11 +32,13 @@ dev-dependencies = [
   "pylint>=3.2.6",
   "pytest-env>=1.1.4",
   "pytest-mock>=3.14.0",
+  "rich>=13.7.1",
   "mkdocs>=1.6.1",
   "mkdocs-autorefs>=1.2.0",
   "mkdocs-material>=9.5.34",
   "mkdocstrings>=0.26.1",
   "mkdocstrings-python>=1.11.1",
+  "mkdocs-latest-git-tag-plugin>=0.1.2",
 ]
 
 [tool.setuptools_scm]
@@ -49,27 +52,23 @@ Documentation = "https://developer.nexthink.com/docs/api/"
 pythonpath = ["src"]
 testpaths = ["tests/unit", "tests/integration"]
 env = [
-    "NEXTHINK_API_YAML=src/nexthink_api/yaml",
     "NEXTHINK_API_TESTS_DATA=tests"
-]
-markers = [
-    "yaml: test with YAML file",
 ]
 addopts = ["--assert=plain", "-ra", "--showlocals", "--strict-markers", "--strict-config"]
 xfail_strict = true 
 filterwarnings = ["error"]
 log_cli_level = "info"
-
-[pytest]
-mock_use_standalone_module = true
+markers = [
+    "integration: optional tests that call a real Nexthink tenant",
+]
 
 [tool.ruff.lint]
 select = [
     "D",     # pydocstyle
     "PL",    # Pylint
     "E",     # pycodestyle
-    "F",     # pyflakes
     "W",     # pycodestyle
+    "F",     # pyflakes
     "C90",   # mccabe
     "ANN",   # flake8-annotations
     "N",     # pep8-naming
@@ -81,13 +80,27 @@ ignore = [
     "ANN101",   # Missing type annotation for self in method
     "ANN102",   # Missing type annotation for cls in classmethod
     "ANN204",   # Missing return type annotation for special method `__init__`
+    "PLR6301",  # Method could be a static method
 ]
 
 [tool.ruff]
 line-length  = 120
+preview=true
 exclude = [
     "tests",
     "venv",
     ".venv",
 ]
 
+[tool.ruff.format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"

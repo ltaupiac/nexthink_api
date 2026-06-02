@@ -10,7 +10,15 @@ class NxtEndpoint(str, Enum):
     Enrichment: Final[str] = '/api/v1/enrichment/data/fields'
     Act: Final[str] = '/api/v1/act/execute'
     Engage: Final[str] = '/api/v1/euf/campaign/trigger'
-    Workflow: Final[str] = '/api/v1/workflow/execute'
+    Workflow: Final[str] = '/api/v1/workflows/execute'
+    WorkflowV2: Final[str] = '/api/v2/workflows/execute'
+    WorkflowThinkletTrigger: Final[str] = '/api/v1/workflows/workflows'
+    WorkflowDetails: Final[str] = '/api/v1/workflows/details'
+    Workflows: Final[str] = '/api/v1/workflows'
+    SparkHandoff: Final[str] = '/api/v1/spark/handoff'
+    DataManagement: Final[str] = '/api/v1/data-management/device/deletions'
+    RemoteActionsDetails: Final[str] = '/api/v1/act/remote-action/details'
+    RemoteActions: Final[str] = '/api/v1/act/remote-action'
     Nql: Final[str] = '/api/v1/nql/execute'
     NqlV2: Final[str] = '/api/v2/nql/execute'
     NqlExport: Final[str] = '/api/v1/nql/export'
@@ -32,4 +40,7 @@ class NxtEndpoint(str, Enum):
                 The name of the API or None if path is not in the Endpoints list.
 
         """
-        return next((endpoint.name for endpoint in cls if path.startswith(endpoint.value)), None)
+        matching_endpoints = [endpoint for endpoint in cls if path.startswith(endpoint.value)]
+        if not matching_endpoints:
+            return None
+        return max(matching_endpoints, key=lambda endpoint: len(endpoint.value)).name

@@ -10,7 +10,10 @@ class TestNxtTokenRequest():
     def testValidHeaderWIthModelDump(self) -> None:
         v1: NxtTokenRequest = NxtTokenRequest()
         d: dict = v1.get_request_header()
-        assert d == {'grant_type': 'client_credentials'}
+        assert d == {
+            'grant_type': 'client_credentials',
+            'scope': 'service:integration',
+        }
 
     def testModifyHeader(self) -> None:
         with pytest.raises(ValidationError):

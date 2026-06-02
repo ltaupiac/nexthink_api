@@ -4,7 +4,6 @@ import os
 from pathlib import Path
 import json
 import pytest
-import yaml
 
 from nexthink_api import (
     NxtApiClient,
@@ -40,22 +39,6 @@ def data_loader(pytestconfig, request):
             data = json.load(f)
         return data
     return _data_loader
-
-
-@pytest.fixture
-def read_yaml_file(pytestconfig):
-    """A fixture function that reads a YAML file that describe de Nexthink API.
-    It loads the YAML file specified by the 'NEXTHINK_API_YAML' environment variable.
-    Returns the parsed YAML content.
-    """
-    def _read_yaml_file(filename):
-        root_dir = pytestconfig.rootpath
-        yaml_var = os.environ.get('NEXTHINK_API_YAML')
-        # load and parse YAML file
-        yaml_file = Path(root_dir / yaml_var / filename)
-        with open(yaml_file, 'r') as f:
-            return yaml.safe_load(f)
-    return _read_yaml_file
 
 
 # Bypass the token authentication

@@ -6,9 +6,7 @@ from nexthink_api import NxtIdentification, NxtIdentificationName
 
 
 class TestNxtIdentification:
-    """Test the correspondence between the values obtained from an enum and a YAML file list.
-    :param get_identification_name_from_yaml: A fixture that returns a list of Identification names from YAML file.
-    """
+    """Test identification model validation and enum serialization."""
 
     # Instance with valid parameters
     def test_NxtIdentification1(self) -> None:

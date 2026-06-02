@@ -32,6 +32,7 @@ extra_css:
   - 'extra.css'
 
 plugins:
+  - latest-git-tag:
   - search:
   - mkdocstrings:
       default_handler: python
@@ -42,7 +43,7 @@ plugins:
           options:
             show_symbol_type_heading: true
             show_symbol_type_toc: true
-            filters: [ '!__init__', '!__all__' ]
+            filters: [ '!^_', '!__init__', '!__all__' ]
             docstring_options:
               ignore_init_summary: true
             merge_init_summary: true

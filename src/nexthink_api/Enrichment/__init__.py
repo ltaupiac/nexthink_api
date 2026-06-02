@@ -2,6 +2,7 @@
 
 from nexthink_api.Enrichment.nxt_bad_request_response import NxtBadRequestResponse
 from nexthink_api.Enrichment.nxt_enrichment import NxtEnrichment
+from nexthink_api.Enrichment.nxt_enrichment_request import MAX_ENRICHMENTS_PER_REQUEST
 from nexthink_api.Enrichment.nxt_enrichment_request import NxtEnrichmentRequest
 from nexthink_api.Enrichment.nxt_error import NxtError
 from nexthink_api.Enrichment.nxt_field import NxtField
@@ -17,6 +18,7 @@ from nexthink_api.Enrichment.nxt_success_response import NxtSuccessResponse
 __all__ = [
     'NxtBadRequestResponse',
     "NxtEnrichment",
+    "MAX_ENRICHMENTS_PER_REQUEST",
     "NxtEnrichmentRequest",
     "NxtError",
     "NxtField",

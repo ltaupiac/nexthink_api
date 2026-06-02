@@ -68,17 +68,16 @@ class TestNxtNqlApiExecuteV2Response:
                 data=[{"key1": "value1", "key2": "value2"}]
             )
 
-    #  data contains non-string values
-    def test_invalid_data_dictionary(self) -> None:
-        with pytest.raises(ValueError):
-            # noinspection PyTypeChecker
-            NxtNqlApiExecuteV2Response(
-                queryId="123",
-                executedQuery="devices | list name",
-                rows=10,
-                executionDateTime="2023-10-01T12:00:00",
-                data=[{"key1": 100}]
-            )
+    # data dictionary values can contain any JSON-compatible values
+    def test_data_dictionary_accepts_json_values(self) -> None:
+        response = NxtNqlApiExecuteV2Response(
+            queryId="123",
+            executedQuery="devices | list name",
+            rows=10,
+            executionDateTime="2023-10-01T12:00:00",
+            data=[{"string": "value", "integer": 100, "null": None}]
+        )
+        assert response.data == [{"string": "value", "integer": 100, "null": None}]
 
     # object from json dict
     def test_serialize_from_json(self, data_loader) -> None:
