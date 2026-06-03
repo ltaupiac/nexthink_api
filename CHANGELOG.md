@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.2 - 2026-06-03
+
+### Fixed
+
+- Addressed GitHub Dependabot alerts by constraining vulnerable runtime
+  dependencies: `urllib3>=2.7.0,<3`, `requests>=2.33.0,<3`,
+  `idna>=3.15,<4` and `certifi>=2024.7.4`.
+- Constrained vulnerable documentation/development transitive dependencies:
+  `GitPython>=3.1.50,<4`, `Jinja2>=3.1.6,<4` and `Markdown>=3.8.1,<4`.
+- Regenerated `requirements.txt` as the runtime dependency manifest so
+  documentation tooling is not reported as package runtime dependencies.
+
 ## 0.1.0 - 2026-06-02
 
 ### Breaking Changes

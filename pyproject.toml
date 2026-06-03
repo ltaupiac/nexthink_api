@@ -12,11 +12,13 @@ description = "Python package for Nexthink API"
 requires-python = ">=3.10"
 keywords=["nexthink", "nql", "enrichment"]
 dependencies=[
-    "requests==2.31.0",
-    "urllib3",
+    "requests>=2.33.0,<3",
+    "urllib3>=2.7.0,<3",
     "pydantic",
     "pandas>=2.2.2",
     "truststore>=0.10.0",
+    "idna>=3.15,<4",
+    "certifi>=2024.7.4",
 ]
 readme = "README.md"
 
@@ -39,6 +41,9 @@ dev = [
   "mkdocstrings>=0.26.1",
   "mkdocstrings-python>=1.11.1",
   "mkdocs-latest-git-tag-plugin>=0.1.2",
+  "GitPython>=3.1.50,<4",
+  "Jinja2>=3.1.6,<4",
+  "Markdown>=3.8.1,<4",
 ]
 
 [tool.setuptools_scm]

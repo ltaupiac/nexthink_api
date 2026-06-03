@@ -2,81 +2,41 @@
 #    uv pip compile pyproject.toml -o requirements.txt
 annotated-types==0.6.0
     # via pydantic
-certifi==2024.2.2
-    # via requests
+certifi==2026.5.20
+    # via
+    #   nexthink-api (pyproject.toml)
+    #   requests
 charset-normalizer==3.3.2
     # via requests
-click==8.1.7
-    # via mkdocs
-ghp-import==2.1.0
-    # via mkdocs
-gitdb==4.0.11
-    # via gitpython
-gitpython==3.1.43
-    # via mkdocs-latest-git-tag-plugin
-idna==3.7
-    # via requests
-jinja2==3.1.4
-    # via mkdocs
-markdown==3.7
-    # via mkdocs
-markupsafe==2.1.5
+idna==3.18
     # via
-    #   jinja2
-    #   mkdocs
-mergedeep==1.3.4
-    # via
-    #   mkdocs
-    #   mkdocs-get-deps
-mkdocs==1.6.1
-    # via mkdocs-latest-git-tag-plugin
-mkdocs-get-deps==0.2.0
-    # via mkdocs
-mkdocs-latest-git-tag-plugin==0.1.2
-    # via nexthink-api (pyproject.toml)
+    #   nexthink-api (pyproject.toml)
+    #   requests
 numpy==2.1.1
     # via pandas
-packaging==24.1
-    # via mkdocs
 pandas==2.2.2
     # via nexthink-api (pyproject.toml)
-pathspec==0.12.1
-    # via mkdocs
-platformdirs==4.3.3
-    # via mkdocs-get-deps
 pydantic==2.7.1
     # via nexthink-api (pyproject.toml)
 pydantic-core==2.18.2
     # via pydantic
 python-dateutil==2.9.0.post0
-    # via
-    #   ghp-import
-    #   pandas
+    # via pandas
 pytz==2024.2
     # via pandas
-pyyaml==6.0.1
-    # via
-    #   nexthink-api (pyproject.toml)
-    #   mkdocs
-    #   mkdocs-get-deps
-    #   pyyaml-env-tag
-pyyaml-env-tag==0.1
-    # via mkdocs
-requests==2.31.0
+requests==2.34.2
     # via nexthink-api (pyproject.toml)
 six==1.16.0
     # via python-dateutil
-smmap==5.0.1
-    # via gitdb
+truststore==0.10.4
+    # via nexthink-api (pyproject.toml)
 typing-extensions==4.11.0
     # via
     #   pydantic
     #   pydantic-core
 tzdata==2024.1
     # via pandas
-urllib3==2.2.1
+urllib3==2.7.0
     # via
     #   nexthink-api (pyproject.toml)
     #   requests
-watchdog==5.0.2
-    # via mkdocs
