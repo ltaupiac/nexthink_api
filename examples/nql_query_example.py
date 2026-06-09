@@ -5,6 +5,7 @@ import os
 import sys
 from importlib.metadata import PackageNotFoundError, version
 
+import pandas as pd
 from rich_output import console, ko, ok, panel, step, text_panel
 from nexthink_api import (
     NexthinkClient,
@@ -39,7 +40,7 @@ if client_id is None or client_secret is None:
     ko("client_id or client_secret not found")
     sys.exit(1)
 
-step("[1/4] Checking local package version")
+step("[1/5] Checking local package version")
 try:
     ok(f"nexthink_api version: {version('nexthink_api')}")
 except PackageNotFoundError:
@@ -52,19 +53,19 @@ if not nql_query_id or nql_query_id == default_nql_query_id:
     console.print("Set nexthink_nql_query_id to a real NQL query ID before executing.")
     sys.exit(0)
 
-step("[2/4] Creating Nexthink client and retrieving token")
+step("[2/5] Creating Nexthink client and retrieving token")
 nxtClient = NexthinkClient(tenant, NxtRegionName(region), client_id=client_id, client_secret=client_secret)
 if nxtClient.token is None:
     ko("Token retrieval failed.")
     sys.exit(1)
 ok("Token retrieved successfully.")
 
-step("[3/4] Executing NQL query")
+step("[3/5] Executing NQL query")
 console.print("Query id:", f"[bold]{nql_query_id}[/bold]")
 nqlRequest = NxtNqlApiExecuteRequest(queryId=nql_query_id)
 response = nxtClient.nql.execute(nqlRequest, version="v2")
 
-step("[4/4] Displaying response")
+step("[4/5] Displaying response")
 if isinstance(response, NxtNqlApiExecuteResponse) or isinstance(response, NxtNqlApiExecuteV2Response):
     ok("NQL query executed successfully.")
 
@@ -79,9 +80,19 @@ elif isinstance(response, NxtNqlApiExportResponse):
     ok("NQL export created successfully.")
     response = nxtClient.nql.wait(response)
     panel(response, title="Export status")
-    res = nxtClient.nql.download(response)
-    first_lines = [line for line in res.text.split('\n')[:10]]
-    text_panel("\n".join(first_lines), title="First 10 export lines", border_style="cyan")
 else:
     ko("NQL query returned an unexpected response.")
     panel(response, title="Response", border_style="red")
+    sys.exit(1)
+
+step("[5/5] Consuming response as a DataFrame")
+dataframe: pd.DataFrame
+if isinstance(response, NxtNqlApiExecuteResponse):
+    dataframe = pd.DataFrame(response.data, columns=response.headers)
+elif isinstance(response, NxtNqlApiExecuteV2Response):
+    dataframe = pd.DataFrame(response.data)
+else:
+    dataframe = nxtClient.nql.download_dataframe(response)
+
+ok(f"DataFrame created: {len(dataframe)} rows, {len(dataframe.columns)} columns.")
+text_panel(dataframe.head(10).to_string(index=False), title="First 10 DataFrame rows", border_style="cyan")

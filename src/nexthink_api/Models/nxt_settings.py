@@ -1,6 +1,6 @@
 """Nexthink Tenant Configuration Class."""
 
-from typing import Final, Self, Optional, Dict, Union
+from typing import ClassVar, Self, Optional, Dict, Union
 import os
 from pydantic import BaseModel, HttpUrl, Field, model_validator
 
@@ -32,9 +32,9 @@ class NxtSettings(BaseModel):
 
     """
 
-    base_url: Final = 'https://{instance}.api.{region}.nexthink.cloud'
-    login_base_url: Final = 'https://{instance}-login.{region}.nexthink.cloud'
-    token_path: Final = '/oauth2/default/v1/token'
+    base_url: ClassVar[str] = 'https://{instance}.api.{region}.nexthink.cloud'
+    login_base_url: ClassVar[str] = 'https://{instance}-login.{region}.nexthink.cloud'
+    token_path: ClassVar[str] = '/oauth2/default/v1/token'
     instance: str = Field(min_length=1)
     region: NxtRegionName
     infinity_base_uri: HttpUrl = Field(init=False, default=None)

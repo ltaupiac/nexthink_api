@@ -2,6 +2,7 @@
 
 from http import HTTPStatus
 
+import pandas as pd
 import pytest
 
 from nexthink_api import (
@@ -260,10 +261,10 @@ def test_download_export_rejects_unfinished_status(mocker: object) -> None:
 
 
 def test_download_export_as_df_parses_csv(mocker: object) -> None:
-    """NQL CSV downloads are parsed into a dataframe."""
+    """NQL CSV downloads return a dataframe that supports normal consumption."""
     api_client = mocker.Mock()
     client = NxtNqlClient(api_client)
-    raw_response = mocker.Mock(status_code=HTTPStatus.OK, text="name,count\nalpha,1\n")
+    raw_response = mocker.Mock(status_code=HTTPStatus.OK, text="name,count\nalpha,1\nbeta,3\ngamma,2\n")
     mocker.patch.object(client, "download_export", return_value=raw_response)
     status = NxtNqlApiStatusResponse(
         status=NxtNqlStatus.COMPLETED,
@@ -272,7 +273,11 @@ def test_download_export_as_df_parses_csv(mocker: object) -> None:
 
     value = client.download_export_as_df(status)
 
-    assert value.to_dict(orient="records") == [{"name": "alpha", "count": 1}]
+    assert isinstance(value, pd.DataFrame)
+    assert value.columns.tolist() == ["name", "count"]
+    assert pd.api.types.is_string_dtype(value["name"].dtype)
+    assert value["count"].sum() == 6
+    assert value.loc[value["count"] >= 2, "name"].tolist() == ["beta", "gamma"]
 
 
 def test_download_dataframe_delegates_to_download_export_as_df(mocker: object) -> None:

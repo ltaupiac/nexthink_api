@@ -2,6 +2,16 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.3 - 2026-06-08
+
+### Maintenance
+
+- Updated runtime dependencies to current compatible versions.
+- **Raised the minimum supported Python version from 3.10 to 3.11.**
+- Extended compatibility with current pandas and Pydantic releases.
+- Refreshed development, documentation, build and release tooling.
+- Cleaned package discovery and source distribution contents.
+
 ## 0.1.2 - 2026-06-03
 
 ### Fixed

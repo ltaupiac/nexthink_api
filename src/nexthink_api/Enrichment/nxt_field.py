@@ -1,7 +1,6 @@
 """Enrichment information for the given object, composed of the name of field to be enriched and the desired value."""
 
-from typing import Union
-from typing_extensions import Self
+from typing import Self, Union
 from pydantic import BaseModel, Field, field_serializer, model_validator, InstanceOf
 
 from nexthink_api.Enrichment.nxt_field_name import NxtFieldName
@@ -33,14 +32,14 @@ class NxtField(BaseModel):
         if value contains '#', then customValue must be specified.
         if value doesn't contain '#', then customValue must not be None.
 
+        Returns
+        -------
+            Self: The instance of the model.
+
         Raises
         ------
             ValueError
                 If condition on 'customValue' is violated.
-
-        Returns
-        -------
-            Self: The instance of the model.
 
         """
         if '#' in self.name.value and self.custom_value is None:

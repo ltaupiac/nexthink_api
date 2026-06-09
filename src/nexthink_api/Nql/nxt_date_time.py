@@ -1,8 +1,7 @@
 """Datetime class object for NQL answer."""
 
 from datetime import datetime
-from typing import Self
-from typing_extensions import Annotated
+from typing import Annotated, Self
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 __all__ = ["NxtDateTime"]

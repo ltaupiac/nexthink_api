@@ -61,8 +61,7 @@ class TestNxtNqlApiStatusResponse:
         response = NxtNqlApiStatusResponse.model_validate(json_data)
         assert response.status == NxtNqlStatus(json_data['status']), "status is not correctly affected"
         assert str(response.resultsFileUrl) == json_data['resultsFileUrl'], "url is not correctly affected"
-        # pylint: disable=no-member
-        assert isinstance(response.resultsFileUrl, HttpUrl.__origin__), "resultsFileUrl should be HttpUrl instance type"
+        assert isinstance(response.resultsFileUrl, HttpUrl), "resultsFileUrl should be HttpUrl instance type"
         assert response.errorDescription == json_data['errorDescription'], \
             "error description is not correctly affected"
 

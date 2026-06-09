@@ -265,15 +265,15 @@ class NxtApiClient:  # noqa: PLR0904 - historical compatibility facade exposes l
             data : NxtEnrichmentRequest
                 The data containing the enrichment request.
 
-        Raises
-        ------
-            ValueError
-                If the specified HTTP method is not supported.
-
         Returns
         -------
             EnrichmentResponseType
                 The EnrichmentResponseType object containing the response from the API call.
+
+        Raises
+        ------
+            ValueError
+                If the specified HTTP method is not supported.
 
         """
         self._warn_legacy_method("run_enrichment")
@@ -294,15 +294,15 @@ class NxtApiClient:  # noqa: PLR0904 - historical compatibility facade exposes l
             method : Optional[str], optional
                 The HTTP method to use for the request. Defaults to 'POST'.
 
-        Raises
-        ------
-            ValueError
-                If the specified HTTP method is not supported.
-
         Returns
         -------
             NqlResponseType
                 The nql response object containing the response from the API call.
+
+        Raises
+        ------
+            ValueError
+                If the specified HTTP method is not supported.
 
         """
         self._warn_legacy_method("run_nql")
