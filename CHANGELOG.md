@@ -2,6 +2,14 @@
 
 All notable changes to this project are documented in this file.
 
+## 0.1.4 - 2026-06-10
+
+### Fixed
+
+- Removed unused `twine` development dependency after GitHub reported security
+  alerts on its transitive `cryptography` dependency.
+- Release publishing now relies on `uv publish`.
+
 ## 0.1.3 - 2026-06-08
 
 ### Maintenance
